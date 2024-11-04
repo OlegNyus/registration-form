@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { AlertCircle, Loader } from 'lucide-react';
 
 const RegistrationForm = ({ onSubmitSuccess }) => {
@@ -10,6 +10,11 @@ const RegistrationForm = ({ onSubmitSuccess }) => {
 
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [touchedFields, setTouchedFields] = useState({
+    username: false,
+    email: false,
+    phone: false
+  });
 
   const validateUsername = (value) => {
     if (!value) return 'Username is required';
@@ -37,8 +42,26 @@ const RegistrationForm = ({ onSubmitSuccess }) => {
     return `${numbers.slice(0, 3)}-${numbers.slice(3, 6)}-${numbers.slice(6, 10)}`;
   };
 
+  const getValidFields = useMemo(() => {
+    const validFields = {
+      username: !validateUsername(formData.username),
+      email: !validateEmail(formData.email),
+      phone: !validatePhone(formData.phone)
+    };
+    return Object.values(validFields).filter(Boolean).length;
+  }, [formData]);
+
+  const progressPercentage = useMemo(() => {
+    return (getValidFields / 3) * 100;
+  }, [getValidFields]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
+    setTouchedFields(prev => ({
+      ...prev,
+      [name]: true
+    }));
+
     if (name === 'phone') {
       setFormData(prev => ({
         ...prev,
@@ -77,9 +100,7 @@ const RegistrationForm = ({ onSubmitSuccess }) => {
   };
 
   const isFormValid = () => {
-    return !validateUsername(formData.username) &&
-           !validateEmail(formData.email) &&
-           !validatePhone(formData.phone);
+    return getValidFields === 3;
   };
 
   const handleSubmit = async (e) => {
@@ -108,7 +129,7 @@ const RegistrationForm = ({ onSubmitSuccess }) => {
               errors.username ? 'border-red-500' : 'border-white/30'
             } focus:outline-none focus:ring-2 focus:ring-blue-500`}
           />
-          {errors.username && (
+          {errors.username && touchedFields.username && (
             <div className="mt-2 text-red-500 flex items-center gap-2">
               <AlertCircle className="h-4 w-4" />
               <span>{errors.username}</span>
@@ -128,7 +149,7 @@ const RegistrationForm = ({ onSubmitSuccess }) => {
               errors.email ? 'border-red-500' : 'border-white/30'
             } focus:outline-none focus:ring-2 focus:ring-blue-500`}
           />
-          {errors.email && (
+          {errors.email && touchedFields.email && (
             <div className="mt-2 text-red-500 flex items-center gap-2">
               <AlertCircle className="h-4 w-4" />
               <span>{errors.email}</span>
@@ -148,7 +169,7 @@ const RegistrationForm = ({ onSubmitSuccess }) => {
               errors.phone ? 'border-red-500' : 'border-white/30'
             } focus:outline-none focus:ring-2 focus:ring-blue-500`}
           />
-          {errors.phone && (
+          {errors.phone && touchedFields.phone && (
             <div className="mt-2 text-red-500 flex items-center gap-2">
               <AlertCircle className="h-4 w-4" />
               <span>{errors.phone}</span>
@@ -156,24 +177,34 @@ const RegistrationForm = ({ onSubmitSuccess }) => {
           )}
         </div>
 
-        <button
-          type="submit"
-          disabled={!isFormValid() || isLoading}
-          className={`w-full p-2 rounded font-medium flex items-center justify-center space-x-2
-            ${isFormValid() && !isLoading 
-              ? 'bg-green-500 hover:bg-green-600' 
-              : 'bg-gray-500 cursor-not-allowed'
-            } transition-colors duration-200`}
-        >
-          {isLoading ? (
-            <>
-              <Loader className="w-5 h-5 animate-spin" />
-              <span>Submitting...</span>
-            </>
-          ) : (
-            <span>Submit</span>
-          )}
-        </button>
+        <div className="relative">
+          <button
+            type="submit"
+            disabled={!isFormValid() || isLoading}
+            className="w-full h-10 rounded font-medium relative overflow-hidden"
+          >
+            {/* Progress bar background */}
+            <div className="absolute inset-0 bg-gray-500"></div>
+            
+            {/* Progress bar */}
+            <div 
+              className="absolute inset-y-0 left-0 bg-green-500 transition-all duration-300"
+              style={{ width: `${progressPercentage}%` }}
+            ></div>
+            
+            {/* Button content */}
+            <div className="relative flex items-center justify-center space-x-2">
+              {isLoading ? (
+                <>
+                  <Loader className="w-5 h-5 animate-spin" />
+                  <span>Submitting...</span>
+                </>
+              ) : (
+                <span>Submit ({Math.round(progressPercentage)}%)</span>
+              )}
+            </div>
+          </button>
+        </div>
       </form>
     </div>
   );
