@@ -1,14 +1,11 @@
 import React from 'react';
 import { CheckCircle, ArrowLeft } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const ThankYouPage = ({ onBack }) => {
   return (
-    <Card className="w-full max-w-md bg-white/10 backdrop-blur-lg text-white">
-      <CardHeader>
-        <CardTitle className="text-center">Thank You!</CardTitle>
-      </CardHeader>
-      <CardContent className="text-center">
+    <div className="w-full max-w-md bg-white/10 backdrop-blur-lg text-white rounded-lg p-8">
+      <h2 className="text-2xl font-bold text-center mb-6">Thank You!</h2>
+      <div className="text-center">
         <CheckCircle className="w-16 h-16 mx-auto mb-4 text-green-400" />
         <p>Your registration has been successfully submitted!</p>
         <button
@@ -18,8 +15,8 @@ const ThankYouPage = ({ onBack }) => {
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Registration</span>
         </button>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
