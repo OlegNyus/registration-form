@@ -1,7 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { AlertCircle, Loader } from 'lucide-react';
+import { useCustomers } from '../context/CustomersContext';
 
 const RegistrationForm = ({ onSubmitSuccess }) => {
+  const { addCustomer } = useCustomers();
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -108,9 +110,19 @@ const RegistrationForm = ({ onSubmitSuccess }) => {
     if (!isFormValid()) return;
 
     setIsLoading(true);
+    
+    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Add the new customer to context
+    addCustomer({
+      username: formData.username,
+      email: formData.email,
+      phone: formData.phone
+    });
+
     setIsLoading(false);
-    onSubmitSuccess();
+    onSubmitSuccess(formData);
   };
 
   return (
