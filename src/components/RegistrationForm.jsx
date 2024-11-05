@@ -12,17 +12,13 @@ const RegistrationForm = ({ onSubmitSuccess }) => {
 
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [touchedFields, setTouchedFields] = useState({
-    username: false,
-    email: false,
-    phone: false
-  });
 
   const validateUsername = (value) => {
-    if (!value) return 'Username is required';
-    if (value.length > 50) return 'Username must be less than 50 characters';
-    if (!/^[a-zA-Z0-9]+$/.test(value)) return 'Username can only contain letters and numbers';
-    if (!isUsernameUnique(value)) return 'Username must be unique';
+    if (!value) return 'User Name is required';
+    if (value.length < 3) return 'User Name must be at least 3 characters';
+    if (value.length > 20) return 'User Name must be less than 20 characters';
+    if (!/^[a-zA-Z0-9]+$/.test(value)) return 'User Name can only contain letters and numbers';
+    if (!isUsernameUnique(value)) return 'User Name must be unique';
     return '';
   };
 
@@ -60,27 +56,37 @@ const RegistrationForm = ({ onSubmitSuccess }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setTouchedFields(prev => ({
-      ...prev,
-      [name]: true
-    }));
 
     if (name === 'phone') {
+      const formattedValue = formatPhone(value);
       setFormData(prev => ({
         ...prev,
-        [name]: formatPhone(value)
+        [name]: formattedValue
+      }));
+      setErrors(prev => ({
+        ...prev,
+        [name]: validatePhone(formattedValue)
       }));
     } else {
       setFormData(prev => ({
         ...prev,
         [name]: value
       }));
-    }
-
-    if (name === 'username') {
+      
+      let error = '';
+      switch (name) {
+        case 'username':
+          error = validateUsername(value);
+          break;
+        case 'email':
+          error = validateEmail(value);
+          break;
+        default:
+          break;
+      }
       setErrors(prev => ({
         ...prev,
-        username: ''
+        [name]: error
       }));
     }
   };
@@ -138,7 +144,7 @@ const RegistrationForm = ({ onSubmitSuccess }) => {
       <h2 className="text-2xl font-bold text-center mb-6">Registration</h2>
       <form onSubmit={handleSubmit} className="space-y-6" data-cy="registration-form">
         <div>
-          <label className="block mb-2">Username</label>
+          <label className="block mb-2">User Name</label>
           <input
             data-cy="username-input"
             type="text"
@@ -150,8 +156,8 @@ const RegistrationForm = ({ onSubmitSuccess }) => {
               errors.username ? 'border-red-500' : 'border-white/30'
             } focus:outline-none focus:ring-2 focus:ring-blue-500`}
           />
-          {errors.username && touchedFields.username && (
-            <div data-cy="username-error" className="mt-2 text-red-500 flex items-center gap-2">
+          {errors.username && (
+            <div data-cy="error-message-username" className="mt-2 text-red-500 flex items-center gap-2">
               <AlertCircle className="h-4 w-4" />
               <span>{errors.username}</span>
             </div>
@@ -171,8 +177,8 @@ const RegistrationForm = ({ onSubmitSuccess }) => {
               errors.email ? 'border-red-500' : 'border-white/30'
             } focus:outline-none focus:ring-2 focus:ring-blue-500`}
           />
-          {errors.email && touchedFields.email && (
-            <div data-cy="email-error" className="mt-2 text-red-500 flex items-center gap-2">
+          {errors.email && (
+            <div data-cy="error-message-email" className="mt-2 text-red-500 flex items-center gap-2">
               <AlertCircle className="h-4 w-4" />
               <span>{errors.email}</span>
             </div>
@@ -192,8 +198,8 @@ const RegistrationForm = ({ onSubmitSuccess }) => {
               errors.phone ? 'border-red-500' : 'border-white/30'
             } focus:outline-none focus:ring-2 focus:ring-blue-500`}
           />
-          {errors.phone && touchedFields.phone && (
-            <div data-cy="phone-error" className="mt-2 text-red-500 flex items-center gap-2">
+          {errors.phone && (
+            <div data-cy="error-message-phone" className="mt-2 text-red-500 flex items-center gap-2">
               <AlertCircle className="h-4 w-4" />
               <span>{errors.phone}</span>
             </div>
@@ -212,6 +218,7 @@ const RegistrationForm = ({ onSubmitSuccess }) => {
             
             {/* Progress bar */}
             <div 
+              data-cy="progress-bar"
               className="absolute inset-y-0 left-0 bg-green-500 transition-all duration-300"
               style={{ width: `${progressPercentage}%` }}
             ></div>
