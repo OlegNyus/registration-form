@@ -132,6 +132,7 @@ const RegistrationForm = ({ onSubmitSuccess }) => {
         <div>
           <label className="block mb-2">Username</label>
           <input
+            data-cy="username-input"
             type="text"
             name="username"
             value={formData.username}
@@ -152,6 +153,7 @@ const RegistrationForm = ({ onSubmitSuccess }) => {
         <div>
           <label className="block mb-2">Email</label>
           <input
+            data-cy="email-input"
             type="email"
             name="email"
             value={formData.email}
@@ -172,6 +174,7 @@ const RegistrationForm = ({ onSubmitSuccess }) => {
         <div>
           <label className="block mb-2">Phone</label>
           <input
+            data-cy="phone-input"
             type="tel"
             name="phone"
             value={formData.phone}
@@ -191,6 +194,7 @@ const RegistrationForm = ({ onSubmitSuccess }) => {
 
         <div className="relative">
           <button
+            data-cy="submit-button"
             type="submit"
             disabled={!isFormValid() || isLoading}
             className="w-full h-10 rounded font-medium relative overflow-hidden"

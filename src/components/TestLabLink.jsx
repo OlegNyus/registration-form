@@ -3,6 +3,7 @@ import React from 'react';
 const TestLabLink = () => {
   return (
     <a
+      data-cy="test-lab-link"
       href="https://thetestlab.ai"
       target="_blank"
       rel="noopener noreferrer"

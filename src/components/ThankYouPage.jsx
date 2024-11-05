@@ -10,6 +10,7 @@ const ThankYouPage = ({ onBack, onViewCustomers }) => {
         <p>Your registration has been successfully submitted!</p>
         <div className="flex justify-center gap-4 mt-6">
           <button
+            data-cy="back-to-registration-button"
             onClick={onBack}
             className="px-4 py-2 rounded bg-white/20 hover:bg-white/30 transition-colors duration-200 flex items-center justify-center space-x-2"
           >
@@ -17,6 +18,7 @@ const ThankYouPage = ({ onBack, onViewCustomers }) => {
             <span>Back to Registration</span>
           </button>
           <button
+            data-cy="view-customers-button"
             onClick={onViewCustomers}
             className="px-4 py-2 rounded bg-blue-500/50 hover:bg-blue-500/70 transition-colors duration-200 flex items-center justify-center space-x-2"
           >
