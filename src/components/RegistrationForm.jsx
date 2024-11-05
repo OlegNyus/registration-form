@@ -212,7 +212,8 @@ const RegistrationForm = ({ onSubmitSuccess }) => {
                   <span>Submitting...</span>
                 </>
               ) : (
-                <span>Submit ({Math.round(progressPercentage)}%)</span>
+                // <span>Submit ({Math.round(progressPercentage)}%)</span>
+                <span>Submit</span>
               )}
             </div>
           </button>

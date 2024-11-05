@@ -1,6 +1,7 @@
 import React from 'react';
 import { useCustomers } from '../context/CustomersContext';
 import { Trash2, ArrowLeft } from 'lucide-react';
+import TestLabLink from '../components/TestLabLink';
 
 const Customers = ({ onBack }) => {
   const { customers, deleteCustomer } = useCustomers();
@@ -54,6 +55,7 @@ const Customers = ({ onBack }) => {
           </div>
         )}
       </div>
+      <TestLabLink />
     </div>
   );
 };
