@@ -13,8 +13,19 @@ export const CustomersProvider = ({ children }) => {
     setCustomers(prev => prev.filter(customer => customer.email !== email));
   };
 
+  const isUsernameUnique = (username) => {
+    return !customers.some(customer => 
+      customer.username.toLowerCase() === username.toLowerCase()
+    );
+  };
+
   return (
-    <CustomersContext.Provider value={{ customers, addCustomer, deleteCustomer }}>
+    <CustomersContext.Provider value={{ 
+      customers, 
+      addCustomer, 
+      deleteCustomer,
+      isUsernameUnique 
+    }}>
       {children}
     </CustomersContext.Provider>
   );

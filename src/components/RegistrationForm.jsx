@@ -3,7 +3,7 @@ import { AlertCircle, Loader } from 'lucide-react';
 import { useCustomers } from '../context/CustomersContext';
 
 const RegistrationForm = ({ onSubmitSuccess }) => {
-  const { addCustomer } = useCustomers();
+  const { addCustomer, isUsernameUnique } = useCustomers();
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -22,6 +22,7 @@ const RegistrationForm = ({ onSubmitSuccess }) => {
     if (!value) return 'Username is required';
     if (value.length > 50) return 'Username must be less than 50 characters';
     if (!/^[a-zA-Z0-9]+$/.test(value)) return 'Username can only contain letters and numbers';
+    if (!isUsernameUnique(value)) return 'Username must be unique';
     return '';
   };
 
@@ -73,6 +74,13 @@ const RegistrationForm = ({ onSubmitSuccess }) => {
       setFormData(prev => ({
         ...prev,
         [name]: value
+      }));
+    }
+
+    if (name === 'username') {
+      setErrors(prev => ({
+        ...prev,
+        username: ''
       }));
     }
   };
@@ -128,7 +136,7 @@ const RegistrationForm = ({ onSubmitSuccess }) => {
   return (
     <div className="w-full max-w-md bg-white/10 backdrop-blur-lg text-white rounded-lg p-8">
       <h2 className="text-2xl font-bold text-center mb-6">Registration</h2>
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6" data-cy="registration-form">
         <div>
           <label className="block mb-2">Username</label>
           <input
@@ -143,7 +151,7 @@ const RegistrationForm = ({ onSubmitSuccess }) => {
             } focus:outline-none focus:ring-2 focus:ring-blue-500`}
           />
           {errors.username && touchedFields.username && (
-            <div className="mt-2 text-red-500 flex items-center gap-2">
+            <div data-cy="username-error" className="mt-2 text-red-500 flex items-center gap-2">
               <AlertCircle className="h-4 w-4" />
               <span>{errors.username}</span>
             </div>
@@ -164,7 +172,7 @@ const RegistrationForm = ({ onSubmitSuccess }) => {
             } focus:outline-none focus:ring-2 focus:ring-blue-500`}
           />
           {errors.email && touchedFields.email && (
-            <div className="mt-2 text-red-500 flex items-center gap-2">
+            <div data-cy="email-error" className="mt-2 text-red-500 flex items-center gap-2">
               <AlertCircle className="h-4 w-4" />
               <span>{errors.email}</span>
             </div>
@@ -185,7 +193,7 @@ const RegistrationForm = ({ onSubmitSuccess }) => {
             } focus:outline-none focus:ring-2 focus:ring-blue-500`}
           />
           {errors.phone && touchedFields.phone && (
-            <div className="mt-2 text-red-500 flex items-center gap-2">
+            <div data-cy="phone-error" className="mt-2 text-red-500 flex items-center gap-2">
               <AlertCircle className="h-4 w-4" />
               <span>{errors.phone}</span>
             </div>
@@ -216,7 +224,6 @@ const RegistrationForm = ({ onSubmitSuccess }) => {
                   <span>Submitting...</span>
                 </>
               ) : (
-                // <span>Submit ({Math.round(progressPercentage)}%)</span>
                 <span>Submit</span>
               )}
             </div>
