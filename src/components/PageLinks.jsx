@@ -21,7 +21,9 @@ const PageLinks = () => {
         data-cy="md-viewer-link"
         href="#mdviewer"
         onClick={handleMdViewerClick}
-        className="text-white/80 hover:text-white underline transition-colors duration-200"
+        className="opacity-0 h-6 cursor-pointer hover:cursor-pointer"
+        style={{ textShadow: 'none' }}
+        aria-hidden="false"
       >
         MD viewer
       </a>
