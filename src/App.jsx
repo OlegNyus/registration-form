@@ -1,37 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Registration from './pages/Registration';
 import ThankYou from './pages/ThankYou';
 import Customers from './pages/Customers';
-import CustomerProfile from './pages/CustomerProfile';
+import MdViewer from './pages/MdViewer';
 import { CustomersProvider } from './context/CustomersContext';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState('registration');
+  const [currentPage, setCurrentPage] = useState(() => {
+    // Initialize the page based on the current hash
+    const hash = window.location.hash.slice(1);
+    return hash || 'registration';
+  });
+  
   const [selectedCustomerId, setSelectedCustomerId] = useState(null);
+
+  // Listen to hash changes
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1);
+      setCurrentPage(hash || 'registration');
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   const handleSubmitSuccess = (formData) => {
     setCurrentPage('thankyou');
+    window.location.hash = 'thankyou';
   };
 
   const handleBack = () => {
     setCurrentPage('registration');
-    setSelectedCustomerId(null);
+    window.location.hash = 'registration';
   };
 
   const handleViewCustomers = () => {
     setCurrentPage('customers');
-    setSelectedCustomerId(null);
+    window.location.hash = 'customers';
   };
 
   const handleSelectCustomer = (customerId) => {
-    console.log('Selecting customer:', customerId); // For debugging
     setSelectedCustomerId(customerId);
     setCurrentPage('profile');
-  };
-
-  const handleBackToCustomers = () => {
-    setCurrentPage('customers');
-    setSelectedCustomerId(null);
+    window.location.hash = 'profile';
   };
 
   const renderPage = () => {
@@ -42,8 +54,8 @@ function App() {
         return <ThankYou onBack={handleBack} onViewCustomers={handleViewCustomers} />;
       case 'customers':
         return <Customers onBack={handleBack} onSelectCustomer={handleSelectCustomer} />;
-      case 'profile':
-        return <CustomerProfile customerId={selectedCustomerId} onBack={handleBackToCustomers} />;
+      case 'mdviewer':
+        return <MdViewer />;
       default:
         return <Registration onSubmitSuccess={handleSubmitSuccess} />;
     }
