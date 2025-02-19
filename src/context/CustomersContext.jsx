@@ -9,8 +9,10 @@ export const CustomersProvider = ({ children }) => {
     setCustomers(prev => [...prev, customer]);
   };
 
-  const deleteCustomer = (email) => {
-    setCustomers(prev => prev.filter(customer => customer.email !== email));
+  const deleteCustomer = (emailToDelete) => {
+    setCustomers(currentCustomers => 
+      currentCustomers.filter(customer => customer.email !== emailToDelete)
+    );
   };
 
   const isUsernameUnique = (username) => {
