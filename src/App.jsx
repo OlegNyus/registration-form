@@ -3,18 +3,19 @@ import Registration from './pages/Registration';
 import ThankYou from './pages/ThankYou';
 import Customers from './pages/Customers';
 import MdViewer from './pages/MdViewer';
+import MdFilesList from './pages/MdFilesList';
 import { CustomersProvider } from './context/CustomersContext';
+import { MdFilesProvider } from './context/MdFilesContext';
 
 function App() {
   const [currentPage, setCurrentPage] = useState(() => {
-    // Initialize the page based on the current hash
     const hash = window.location.hash.slice(1);
     return hash || 'registration';
   });
   
   const [selectedCustomerId, setSelectedCustomerId] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
-  // Listen to hash changes
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1);
@@ -31,8 +32,13 @@ function App() {
   };
 
   const handleBack = () => {
-    setCurrentPage('registration');
-    window.location.hash = 'registration';
+    if (currentPage === 'mdfiles') {
+      setCurrentPage('mdviewer');
+      window.location.hash = 'mdviewer';
+    } else {
+      setCurrentPage('registration');
+      window.location.hash = 'registration';
+    }
   };
 
   const handleViewCustomers = () => {
@@ -46,6 +52,12 @@ function App() {
     window.location.hash = 'profile';
   };
 
+  const handleCategorySelect = (category) => {
+    setSelectedCategory(category);
+    setCurrentPage('mdfiles');
+    window.location.hash = 'mdfiles';
+  };
+
   const renderPage = () => {
     switch (currentPage) {
       case 'registration':
@@ -55,7 +67,9 @@ function App() {
       case 'customers':
         return <Customers onBack={handleBack} onSelectCustomer={handleSelectCustomer} />;
       case 'mdviewer':
-        return <MdViewer />;
+        return <MdViewer onCategorySelect={handleCategorySelect} />;
+      case 'mdfiles':
+        return <MdFilesList category={selectedCategory} onBack={handleBack} />;
       default:
         return <Registration onSubmitSuccess={handleSubmitSuccess} />;
     }
@@ -63,7 +77,9 @@ function App() {
 
   return (
     <CustomersProvider>
-      {renderPage()}
+      <MdFilesProvider>
+        {renderPage()}
+      </MdFilesProvider>
     </CustomersProvider>
   );
 }
