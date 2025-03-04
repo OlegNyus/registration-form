@@ -1,3 +1,5 @@
+Generate a User Story based on the requirements below. Create one MD file. Make sure the User Story is accurate and covers all requirements strictly. Do not use Given-When-Then format.
+
 # Registration Form Test Requirements
 
 ## Input Fields Validation
@@ -36,13 +38,13 @@
 
 ### Progress Bar
 - Should show 0% when no fields are valid
-- Should show 33% when one field is valid
-- Should show 66% when two fields are valid
+- Should show 33.3333% when one field is valid
+- Should show 66.6666% when two fields are valid
 - Should show 100% when all fields are valid
 
 ### Submit Button
 - **Enabled State:**
-  - Should be enabled only when all fields are valid
+  - Should be enabled (not clickable) only when all fields are valid - important part
   - Should show "Submit" text when not loading
   
 - **Disabled State:**
@@ -71,4 +73,4 @@
 - Input fields should show red border when invalid
 - Input fields should show default border when valid
 - Progress bar should transition smoothly between states
-- Form should have a semi-transparent background with blur effect 
+- Form should have a semi-transparent background with blur effect
