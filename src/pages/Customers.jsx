@@ -44,7 +44,7 @@ const Customers = ({ onBack, onSelectCustomer }) => {
             <ArrowLeft className="w-4 h-4" />
             <span>Back to Registration</span>
           </button>
-          <h2 className="text-2xl font-bold text-white">Registered Customers</h2>
+          <h2 className="text-2xl font-bold text-white">Customers</h2>
         </div>
         
         {/* Confirmation Dialog */}

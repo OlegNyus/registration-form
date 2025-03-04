@@ -91,7 +91,7 @@ function App() {
           <div className="text-white font-bold text-xl">My App</div>
           <div className="space-x-4">
             <a href="#registration" className="text-white hover:text-gray-300">Home</a>
-            <a href="#customers" className="text-white hover:text-gray-300">Registered Customers</a>
+            <a href="#customers" className="text-white hover:text-gray-300">Customers</a>
             <a href="#fun-ascii" className="text-white hover:text-gray-300">Fun ASCII</a>
           </div>
         </div>
