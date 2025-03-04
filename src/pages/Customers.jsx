@@ -1,33 +1,36 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useCustomers } from '../context/CustomersContext';
-import { ArrowLeft, MoreVertical, Edit2, Trash2 } from 'lucide-react';
+import { ArrowLeft, Edit2, Trash2, X } from 'lucide-react';
 import PageLinks from '../components/PageLinks';
 
 const Customers = ({ onBack, onSelectCustomer }) => {
   const { customers, deleteCustomer } = useCustomers();
-  const [openMenuId, setOpenMenuId] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
-  const handleMenuToggle = useCallback((email, event) => {
-    event.stopPropagation();
-    setOpenMenuId(current => current === email ? null : email);
-  }, []);
+  const handleDeleteClick = (email) => {
+    setConfirmDelete(email);
+  };
 
-  const handleDeleteCustomer = useCallback((emailToDelete) => {
-    deleteCustomer(emailToDelete);
-    setOpenMenuId(null);
-  }, [deleteCustomer]);
+  const confirmDeleteCustomer = () => {
+    if (confirmDelete) {
+      // Force a refresh of localStorage after deletion
+      const updatedCustomers = customers.filter(c => c.email !== confirmDelete);
+      localStorage.setItem('customers', JSON.stringify(updatedCustomers));
+      
+      // Call the context method
+      deleteCustomer(confirmDelete);
+      
+      // Clear confirmation state
+      setConfirmDelete(null);
+      
+      // Force a page reload to ensure everything is in sync
+      window.location.reload();
+    }
+  };
 
-  React.useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (!event.target.closest('[data-cy^="customer-menu"]') && 
-          !event.target.closest('[data-cy^="customer-menu-button"]')) {
-        setOpenMenuId(null);
-      }
-    };
-
-    window.addEventListener('click', handleClickOutside);
-    return () => window.removeEventListener('click', handleClickOutside);
-  }, []);
+  const cancelDelete = () => {
+    setConfirmDelete(null);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 to-purple-900 p-8">
@@ -44,6 +47,40 @@ const Customers = ({ onBack, onSelectCustomer }) => {
           <h2 className="text-2xl font-bold text-white">Registered Customers</h2>
         </div>
         
+        {/* Confirmation Dialog */}
+        {confirmDelete && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-gradient-to-br from-blue-900 to-purple-900 rounded-lg p-6 max-w-md w-full border border-white/20 shadow-xl backdrop-blur-sm">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold text-white">Confirm Delete</h3>
+                <button 
+                  onClick={cancelDelete} 
+                  className="text-white/70 hover:text-white transition-colors duration-200"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <p className="mb-6 text-white/80">
+                Are you sure you want to delete this customer? This action cannot be undone.
+              </p>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={cancelDelete}
+                  className="px-4 py-2 bg-white/10 text-white rounded hover:bg-white/20 transition-colors duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDeleteCustomer}
+                  className="px-4 py-2 bg-red-500/80 text-white rounded hover:bg-red-600 transition-colors duration-200"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        
         {customers.length === 0 ? (
           <p data-cy="no-customers-message" className="text-white text-center">
             No customers registered yet.
@@ -56,7 +93,7 @@ const Customers = ({ onBack, onSelectCustomer }) => {
                   <th className="py-3 px-4 text-left">User Name</th>
                   <th className="py-3 px-4 text-left">Email</th>
                   <th className="py-3 px-4 text-left">Phone</th>
-                  <th className="py-3 px-4 text-center w-[100px]">Action</th>
+                  <th className="py-3 px-4 text-center w-[120px]">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -74,52 +111,24 @@ const Customers = ({ onBack, onSelectCustomer }) => {
                     </td>
                     <td className="py-3 px-4">{customer.email}</td>
                     <td className="py-3 px-4">{customer.phone}</td>
-                    <td className="py-3 px-4">
-                      <div className="relative">
+                    <td className="py-3 px-4 text-center">
+                      <div className="flex justify-center space-x-2">
                         <button
-                          data-cy={`customer-menu-button-${customer.email}`}
-                          onClick={(e) => handleMenuToggle(customer.email, e)}
-                          className="p-2 rounded-full hover:bg-white/10 transition-colors duration-200"
+                          data-cy={`edit-customer-${customer.email}`}
+                          onClick={() => onSelectCustomer(customer.email)}
+                          className="p-2 rounded-full hover:bg-white/10 transition-colors duration-200 text-white"
+                          title="Edit"
                         >
-                          <MoreVertical className="w-5 h-5" />
+                          <Edit2 className="w-5 h-5" />
                         </button>
-                        
-                        {openMenuId === customer.email && (
-                          <div 
-                            data-cy={`customer-menu-${customer.email}`}
-                            className="absolute right-0 mt-2 w-[160px] rounded-md shadow-lg bg-[#432f85] focus:outline-none z-50"
-                            style={{
-                              top: '100%',
-                              right: 0
-                            }}
-                          >
-                            <div className="py-1">
-                              <button
-                                data-cy={`edit-customer-${customer.email}`}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onSelectCustomer(customer.email);
-                                  setOpenMenuId(null);
-                                }}
-                                className="w-full px-4 py-2 text-left flex items-center gap-2 hover:bg-[#4e3799] transition-colors duration-200"
-                              >
-                                <Edit2 className="w-4 h-4" />
-                                <span>Edit</span>
-                              </button>
-                              <button
-                                data-cy={`delete-customer-${customer.email}`}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteCustomer(customer.email);
-                                }}
-                                className="w-full px-4 py-2 text-left flex items-center gap-2 text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors duration-200"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                                <span>Delete</span>
-                              </button>
-                            </div>
-                          </div>
-                        )}
+                        <button
+                          data-cy={`delete-customer-${customer.email}`}
+                          onClick={() => handleDeleteClick(customer.email)}
+                          className="p-2 rounded-full hover:bg-white/10 transition-colors duration-200 text-red-400 hover:text-red-300"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
                       </div>
                     </td>
                   </tr>

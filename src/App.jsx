@@ -4,6 +4,7 @@ import ThankYou from './pages/ThankYou';
 import Customers from './pages/Customers';
 import MdViewer from './pages/MdViewer';
 import MdFilesList from './pages/MdFilesList';
+import UnderDevelopment from './pages/UnderDevelopment';
 import { CustomersProvider } from './context/CustomersContext';
 import { MdFilesProvider } from './context/MdFilesContext';
 import FunAscii from './components/FunAscii';
@@ -36,6 +37,9 @@ function App() {
     if (currentPage === 'mdfiles') {
       setCurrentPage('mdviewer');
       window.location.hash = 'mdviewer';
+    } else if (currentPage === 'under-development') {
+      setCurrentPage('customers');
+      window.location.hash = 'customers';
     } else {
       setCurrentPage('registration');
       window.location.hash = 'registration';
@@ -49,8 +53,8 @@ function App() {
 
   const handleSelectCustomer = (customerId) => {
     setSelectedCustomerId(customerId);
-    setCurrentPage('profile');
-    window.location.hash = 'profile';
+    setCurrentPage('under-development');
+    window.location.hash = 'under-development';
   };
 
   const handleCategorySelect = (category) => {
@@ -73,6 +77,8 @@ function App() {
         return <MdFilesList category={selectedCategory} onBack={handleBack} />;
       case 'fun-ascii':
         return <FunAscii />;
+      case 'under-development':
+        return <UnderDevelopment onBack={handleBack} />;
       default:
         return <Registration onSubmitSuccess={handleSubmitSuccess} />;
     }
