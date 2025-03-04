@@ -50,6 +50,12 @@ function App() {
     } else if (currentPage === 'blogpost') {
       setCurrentPage('blog');
       window.location.hash = 'blog';
+    } else if (currentPage === 'customers') {
+      setCurrentPage('registration');
+      window.location.hash = 'registration';
+    } else if (currentPage === 'thankyou') {
+      setCurrentPage('registration');
+      window.location.hash = 'registration';
     } else {
       setCurrentPage('home');
       window.location.hash = 'home';
