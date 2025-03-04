@@ -2,12 +2,7 @@ import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import PageLinks from '../components/PageLinks';
 
-const LandingPage = () => {
-  // Function to navigate to a specific page
-  const navigateTo = (hash) => {
-    window.location.hash = hash;
-  };
-
+const LandingPage = ({ navigateTo }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 to-purple-900 p-8">
       <div className="max-w-6xl mx-auto">
@@ -17,12 +12,13 @@ const LandingPage = () => {
             Explore our features designed to make your experience seamless and productive.
           </p>
         </div>
-
+        
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
           {/* Registration Feature */}
-          <div 
-            onClick={() => navigateTo('registration')}
+          <a 
+            href="#registration"
             className="bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden shadow-lg transition-transform hover:transform hover:scale-105 cursor-pointer"
+            data-cy="registration-feature"
           >
             <div className="h-48 overflow-hidden">
               <img 
@@ -40,12 +36,13 @@ const LandingPage = () => {
                 Register Now <ArrowRight className="ml-2 w-4 h-4" />
               </div>
             </div>
-          </div>
-
+          </a>
+          
           {/* Customers Feature */}
-          <div 
-            onClick={() => navigateTo('customers')}
+          <a 
+            href="#customers"
             className="bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden shadow-lg transition-transform hover:transform hover:scale-105 cursor-pointer"
+            data-cy="customers-feature"
           >
             <div className="h-48 overflow-hidden">
               <img 
@@ -63,12 +60,13 @@ const LandingPage = () => {
                 View Customers <ArrowRight className="ml-2 w-4 h-4" />
               </div>
             </div>
-          </div>
-
+          </a>
+          
           {/* Blog Feature */}
           <div 
             onClick={() => navigateTo('blog')}
             className="bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden shadow-lg transition-transform hover:transform hover:scale-105 cursor-pointer"
+            data-cy="blog-feature"
           >
             <div className="h-48 overflow-hidden">
               <img 
@@ -87,11 +85,12 @@ const LandingPage = () => {
               </div>
             </div>
           </div>
-
+          
           {/* ASCII Converter Feature */}
-          <div 
-            onClick={() => navigateTo('fun-ascii')}
+          <a 
+            href="#fun-ascii"
             className="bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden shadow-lg transition-transform hover:transform hover:scale-105 cursor-pointer"
+            data-cy="ascii-feature"
           >
             <div className="h-48 overflow-hidden">
               <img 
@@ -109,17 +108,17 @@ const LandingPage = () => {
                 Try Converter <ArrowRight className="ml-2 w-4 h-4" />
               </div>
             </div>
-          </div>
+          </a>
         </div>
 
         <div className="text-center">
           <h2 className="text-2xl font-bold text-white mb-4">Ready to get started?</h2>
-          <button 
-            onClick={() => navigateTo('registration')}
+          <a 
+            href="#registration"
             className="inline-block px-6 py-3 bg-indigo-600 text-white rounded-md font-medium hover:bg-indigo-700 transition-colors duration-200 shadow-md"
           >
             Get Started
-          </button>
+          </a>
         </div>
       </div>
       <PageLinks />

@@ -8,8 +8,10 @@ import UnderDevelopment from './pages/UnderDevelopment';
 import LandingPage from './pages/LandingPage';
 import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
+import BlogPostForm from './pages/BlogPostForm';
 import { CustomersProvider } from './context/CustomersContext';
 import { MdFilesProvider } from './context/MdFilesContext';
+import { BlogProvider } from './context/BlogContext';
 import FunAscii from './components/FunAscii';
 
 function App() {
@@ -21,6 +23,7 @@ function App() {
   const [selectedCustomerId, setSelectedCustomerId] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedBlogPostId, setSelectedBlogPostId] = useState(null);
+  const [editingPostId, setEditingPostId] = useState(null);
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -48,6 +51,9 @@ function App() {
       setCurrentPage('home');
       window.location.hash = 'home';
     } else if (currentPage === 'blogpost') {
+      setCurrentPage('blog');
+      window.location.hash = 'blog';
+    } else if (currentPage === 'blogpostform') {
       setCurrentPage('blog');
       window.location.hash = 'blog';
     } else if (currentPage === 'customers') {
@@ -85,10 +91,26 @@ function App() {
     window.location.hash = 'blogpost';
   };
 
+  const handleNewBlogPost = () => {
+    setCurrentPage('blogpostform');
+    window.location.hash = 'blogpostform';
+  };
+
+  const handleEditPost = (postId) => {
+    setEditingPostId(postId);
+    setCurrentPage('blogpostform');
+    window.location.hash = 'blogpostform';
+  };
+
+  const navigateTo = (page) => {
+    setCurrentPage(page);
+    window.location.hash = page;
+  };
+
   const renderPage = () => {
     switch (currentPage) {
       case 'home':
-        return <LandingPage />;
+        return <LandingPage navigateTo={navigateTo} />;
       case 'registration':
         return <Registration onSubmitSuccess={handleSubmitSuccess} />;
       case 'thankyou':
@@ -102,9 +124,39 @@ function App() {
       case 'fun-ascii':
         return <FunAscii />;
       case 'blog':
-        return <Blog onBack={handleBack} onSelectPost={handleSelectBlogPost} />;
+        return (
+          <Blog 
+            onBack={() => {
+              setCurrentPage('home');
+              window.location.hash = 'home';
+            }} 
+            onSelectPost={handleSelectBlogPost}
+            onNewPost={() => {
+              setEditingPostId(null);
+              setCurrentPage('blogpostform');
+              window.location.hash = 'blogpostform';
+            }}
+            onEditPost={handleEditPost}
+          />
+        );
       case 'blogpost':
-        return <BlogPost onBack={handleBack} postId={selectedBlogPostId} />;
+        return (
+          <BlogPost 
+            onBack={() => setCurrentPage('blog')} 
+            postId={selectedBlogPostId}
+            onEdit={() => handleEditPost(selectedBlogPostId)}
+          />
+        );
+      case 'blogpostform':
+        return (
+          <BlogPostForm 
+            onBack={() => {
+              setCurrentPage('blog');
+              window.location.hash = 'blog';
+            }} 
+            editingPostId={editingPostId}
+          />
+        );
       case 'under-development':
         return <UnderDevelopment onBack={handleBack} />;
       default:
@@ -116,7 +168,13 @@ function App() {
     <div className="App">
       <nav className="bg-gray-800 p-4">
         <div className="container mx-auto flex justify-between items-center">
-          <div className="text-white font-bold text-xl">My App</div>
+          <a 
+            href="#home" 
+            className="text-white font-bold text-xl hover:text-gray-300 transition-colors duration-200"
+            data-cy="app-logo"
+          >
+            My App
+          </a>
           <div className="space-x-4">
             <a href="#home" className="text-white hover:text-gray-300">Home</a>
             <a href="#registration" className="text-white hover:text-gray-300">Register</a>
@@ -129,7 +187,9 @@ function App() {
       
       <CustomersProvider>
         <MdFilesProvider>
-          {renderPage()}
+          <BlogProvider>
+            {renderPage()}
+          </BlogProvider>
         </MdFilesProvider>
       </CustomersProvider>
     </div>
