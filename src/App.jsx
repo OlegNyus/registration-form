@@ -168,13 +168,39 @@ function App() {
     <div className="App">
       <nav className="bg-gray-800 p-4">
         <div className="container mx-auto flex justify-between items-center">
-          <a 
-            href="#home" 
-            className="text-white font-bold text-xl hover:text-gray-300 transition-colors duration-200"
-            data-cy="app-logo"
-          >
-            My App
-          </a>
+          <div className="flex items-center space-x-6">
+            <a 
+              href="#home" 
+              className="text-white font-bold text-xl hover:text-gray-300 transition-colors duration-200"
+              data-cy="app-logo"
+            >
+              My App
+            </a>
+            <a 
+              href="https://qahub.ai" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-white font-bold text-xl hover:text-gray-300 transition-colors duration-200 flex items-center"
+              data-cy="qahub-link"
+            >
+              QA Hub
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+            <a 
+              href="https://thetestlab.ai" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-white font-bold text-xl hover:text-gray-300 transition-colors duration-200 flex items-center"
+              data-cy="testlab-link"
+            >
+              The Test Lab
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+          </div>
           <div className="space-x-4">
             <a href="#home" className="text-white hover:text-gray-300">Home</a>
             <a href="#registration" className="text-white hover:text-gray-300">Register</a>
