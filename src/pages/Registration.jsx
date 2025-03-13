@@ -22,27 +22,41 @@ const Registration = ({ onSubmitSuccess }) => {
   const [formStep, setFormStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [progressPercentage, setProgressPercentage] = useState(0);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   
   const interestOptions = [
-    'Product Updates',
-    'Industry News',
-    'Technical Resources',
-    'Webinars & Events',
-    'Case Studies',
-    'Special Offers'
+    'AI',
+    'Data',
+    'Cloud',
+    'Security',
+    'DevOps',
+    'Other'
   ];
   
   // Calculate progress percentage based on valid fields
   useEffect(() => {
+    let validFields = 0;
+    
     if (formStep === 1) {
-      let validFields = 0;
-      
       if (isValidName(formData.firstName)) validFields++;
       if (isValidName(formData.lastName)) validFields++;
       if (isValidEmail(formData.email)) validFields++;
       if (isValidPhone(formData.phone)) validFields++;
       
       // Each field represents 12.5% of progress
+      setProgressPercentage(validFields * 12.5);
+    } else if (formStep === 2) {
+      // First step fields (4 fields = 50%)
+      validFields = 4;
+      
+      // Add professional info fields
+      if (isValidCompany(formData.company)) validFields++;
+      if (isValidJobTitle(formData.jobTitle)) validFields++;
+      if (formData.interests.length > 0) validFields++;
+      if (formData.terms) validFields++;
+      
+      // Calculate percentage (each field is 12.5%)
       setProgressPercentage(validFields * 12.5);
     }
   }, [formData, formStep]);
@@ -171,12 +185,26 @@ const Registration = ({ onSubmitSuccess }) => {
         }
       }
     } else if (step === 2) {
+      // Company validation
       if (!formData.company.trim()) {
-        newErrors.company = 'Company name is required';
+        newErrors.company = 'Company Name is required';
+      } else if (formData.company.trim().length < 3) {
+        newErrors.company = 'Company Name must be at least 3 characters';
+      } else if (formData.company.trim().length > 20) {
+        newErrors.company = 'Company Name must be less than 20 characters';
+      } else if (!/^[a-zA-Z0-9]+$/.test(formData.company)) {
+        newErrors.company = 'Company Name can only contain letters and numbers';
       }
       
+      // Job Title validation
       if (!formData.jobTitle.trim()) {
-        newErrors.jobTitle = 'Job title is required';
+        newErrors.jobTitle = 'Job Title is required';
+      } else if (formData.jobTitle.trim().length < 3) {
+        newErrors.jobTitle = 'Job Title must be at least 3 characters';
+      } else if (formData.jobTitle.trim().length > 20) {
+        newErrors.jobTitle = 'Job Title must be less than 20 characters';
+      } else if (!/^[a-zA-Z0-9]+$/.test(formData.jobTitle)) {
+        newErrors.jobTitle = 'Job Title can only contain letters and numbers';
       }
       
       if (formData.interests.length === 0) {
@@ -232,6 +260,26 @@ const Registration = ({ onSubmitSuccess }) => {
         setIsSubmitting(false);
       }
     }
+  };
+  
+  // Add validation helpers for company and job title
+  const isValidCompany = (company) => {
+    return company.trim().length >= 3 && company.trim().length <= 20 && /^[a-zA-Z0-9]+$/.test(company);
+  };
+  
+  const isValidJobTitle = (jobTitle) => {
+    return jobTitle.trim().length >= 3 && jobTitle.trim().length <= 20 && /^[a-zA-Z0-9]+$/.test(jobTitle);
+  };
+  
+  // Update the function to show the modal instead of navigating
+  const showTermsAndConditions = (e) => {
+    e.preventDefault();
+    setShowTermsModal(true);
+  };
+  
+  const showPrivacyPolicy = (e) => {
+    e.preventDefault();
+    setShowPrivacyModal(true);
   };
   
   return (
@@ -492,7 +540,7 @@ const Registration = ({ onSubmitSuccess }) => {
                     data-cy="terms-checkbox"
                   />
                   <label htmlFor="terms" className="ml-2 text-white">
-                    I agree to the <a href="#" className="text-indigo-300 hover:text-indigo-200 underline">Terms and Conditions</a> and <a href="#" className="text-indigo-300 hover:text-indigo-200 underline">Privacy Policy</a> *
+                    I agree to the <a href="#" onClick={showTermsAndConditions} className="text-indigo-300 hover:text-indigo-200 underline">Terms and Conditions</a> and <a href="#" onClick={showPrivacyPolicy} className="text-indigo-300 hover:text-indigo-200 underline">Privacy Policy</a> *
                   </label>
                 </div>
                 {errors.terms && (
@@ -548,6 +596,76 @@ const Registration = ({ onSubmitSuccess }) => {
         </form>
       </div>
       <PageLinks />
+      
+      {/* Terms and Conditions Modal */}
+      {showTermsModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-indigo-900 to-purple-800 rounded-lg p-6 max-w-lg w-full border border-white/20 shadow-xl">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-white">Terms and Conditions</h3>
+              <button 
+                onClick={() => setShowTermsModal(false)}
+                className="text-white/70 hover:text-white transition-colors duration-200"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="text-center py-8">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-indigo-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <h4 className="text-xl font-bold text-white mb-2">Coming Soon</h4>
+              <p className="text-white/80 mb-6">
+                Our Terms and Conditions page is currently under development. Please check back later.
+              </p>
+              <button
+                onClick={() => setShowTermsModal(false)}
+                className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-200"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Privacy Policy Modal */}
+      {showPrivacyModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-indigo-900 to-purple-800 rounded-lg p-6 max-w-lg w-full border border-white/20 shadow-xl">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-white">Privacy Policy</h3>
+              <button 
+                onClick={() => setShowPrivacyModal(false)}
+                className="text-white/70 hover:text-white transition-colors duration-200"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="text-center py-8">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-indigo-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+              </svg>
+              <h4 className="text-xl font-bold text-white mb-2">Coming Soon</h4>
+              <p className="text-white/80 mb-6">
+                Our Privacy Policy page is currently under development. Please check back later.
+              </p>
+              <button
+                onClick={() => setShowPrivacyModal(false)}
+                className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-200"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
