@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowRight, Check, AlertCircle, User, Briefcase, Mail, Phone } from 'lucide-react';
 import PageLinks from '../components/PageLinks';
 import { useCustomers } from '../context/CustomersContext';
 
 const Registration = ({ onSubmitSuccess }) => {
-  const { addCustomer } = useCustomers();
+  const { addCustomer, isUsernameUnique } = useCustomers();
   
   const [formData, setFormData] = useState({
     firstName: '',
@@ -21,6 +21,7 @@ const Registration = ({ onSubmitSuccess }) => {
   const [errors, setErrors] = useState({});
   const [formStep, setFormStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [progressPercentage, setProgressPercentage] = useState(0);
   
   const interestOptions = [
     'Product Updates',
@@ -30,6 +31,50 @@ const Registration = ({ onSubmitSuccess }) => {
     'Case Studies',
     'Special Offers'
   ];
+  
+  // Calculate progress percentage based on valid fields
+  useEffect(() => {
+    if (formStep === 1) {
+      let validFields = 0;
+      
+      if (isValidName(formData.firstName)) validFields++;
+      if (isValidName(formData.lastName)) validFields++;
+      if (isValidEmail(formData.email)) validFields++;
+      if (isValidPhone(formData.phone)) validFields++;
+      
+      // Each field represents 12.5% of progress
+      setProgressPercentage(validFields * 12.5);
+    }
+  }, [formData, formStep]);
+  
+  // Validation helper functions
+  const isValidName = (name) => {
+    return name.trim().length >= 3 && name.trim().length <= 20 && /^[a-zA-Z0-9]+$/.test(name);
+  };
+  
+  const isValidEmail = (email) => {
+    return /\S+@\S+\.\S+/.test(email);
+  };
+  
+  const isValidPhone = (phone) => {
+    const digitsOnly = phone.replace(/\D/g, '');
+    return digitsOnly.length >= 10;
+  };
+  
+  // Format phone number as user types
+  const formatPhoneNumber = (value) => {
+    // Strip all non-digits
+    const digitsOnly = value.replace(/\D/g, '');
+    
+    // Format as XXX-XXX-XXXX
+    if (digitsOnly.length <= 3) {
+      return digitsOnly;
+    } else if (digitsOnly.length <= 6) {
+      return `${digitsOnly.slice(0, 3)}-${digitsOnly.slice(3)}`;
+    } else {
+      return `${digitsOnly.slice(0, 3)}-${digitsOnly.slice(3, 6)}-${digitsOnly.slice(6, 10)}`;
+    }
+  };
   
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -58,6 +103,12 @@ const Registration = ({ onSubmitSuccess }) => {
           [name]: checked
         });
       }
+    } else if (name === 'phone') {
+      // Format phone number as user types
+      setFormData({
+        ...formData,
+        [name]: formatPhoneNumber(value)
+      });
     } else {
       // Handle text inputs
       setFormData({
@@ -79,24 +130,45 @@ const Registration = ({ onSubmitSuccess }) => {
     const newErrors = {};
     
     if (step === 1) {
+      // First Name validation
       if (!formData.firstName.trim()) {
-        newErrors.firstName = 'First name is required';
+        newErrors.firstName = 'First Name is required';
+      } else if (formData.firstName.trim().length < 3) {
+        newErrors.firstName = 'First Name must be at least 3 characters';
+      } else if (formData.firstName.trim().length > 20) {
+        newErrors.firstName = 'First Name must be less than 20 characters';
+      } else if (!/^[a-zA-Z0-9]+$/.test(formData.firstName)) {
+        newErrors.firstName = 'First Name can only contain letters and numbers';
       }
       
+      // Last Name validation
       if (!formData.lastName.trim()) {
-        newErrors.lastName = 'Last name is required';
+        newErrors.lastName = 'Last Name is required';
+      } else if (formData.lastName.trim().length < 3) {
+        newErrors.lastName = 'Last Name must be at least 3 characters';
+      } else if (formData.lastName.trim().length > 20) {
+        newErrors.lastName = 'Last Name must be less than 20 characters';
+      } else if (!/^[a-zA-Z0-9]+$/.test(formData.lastName)) {
+        newErrors.lastName = 'Last Name can only contain letters and numbers';
       }
       
+      // Email validation
       if (!formData.email.trim()) {
         newErrors.email = 'Email is required';
       } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-        newErrors.email = 'Email is invalid';
+        newErrors.email = 'Invalid email format';
+      } else if (!isUsernameUnique(formData.email)) {
+        newErrors.email = 'Email must be unique';
       }
       
+      // Phone validation
       if (!formData.phone.trim()) {
-        newErrors.phone = 'Phone number is required';
-      } else if (!/^\d{10,}$/.test(formData.phone.replace(/\D/g, ''))) {
-        newErrors.phone = 'Phone number must have at least 10 digits';
+        newErrors.phone = 'Phone Number is required';
+      } else {
+        const digitsOnly = formData.phone.replace(/\D/g, '');
+        if (digitsOnly.length < 10) {
+          newErrors.phone = 'Phone Number format: XXX-XXX-XXXX';
+        }
       }
     } else if (step === 2) {
       if (!formData.company.trim()) {
@@ -145,7 +217,8 @@ const Registration = ({ onSubmitSuccess }) => {
         // Add customer to context
         addCustomer({
           id: Date.now(),
-          ...formData
+          ...formData,
+          username: `${formData.firstName} ${formData.lastName}` // Create username from first and last name
         });
         
         // Call success callback
@@ -176,7 +249,7 @@ const Registration = ({ onSubmitSuccess }) => {
                 {/* Progress Bar Fill */}
                 <div 
                   className="h-full bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full transition-all duration-500 ease-in-out"
-                  style={{ width: formStep === 1 ? '50%' : '100%' }}
+                  style={{ width: formStep === 1 ? `${progressPercentage}%` : '100%' }}
                 ></div>
               </div>
               
@@ -291,7 +364,7 @@ const Registration = ({ onSubmitSuccess }) => {
                   value={formData.phone}
                   onChange={handleChange}
                   className={`w-full p-3 bg-white/5 border ${errors.phone ? 'border-red-500' : 'border-white/20'} rounded-md text-white focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 transition-all duration-200`}
-                  placeholder="Enter your phone number"
+                  placeholder="Enter your phone number in XXX-XXX-XXXX format"
                   data-cy="phone-input"
                 />
                 {errors.phone && (
