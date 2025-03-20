@@ -52,3 +52,7 @@ In the project directory, you can run:
 ## Environment Variables
 
 Create a `.env` file in the root directory and add any necessary environment variables:
+
+
+npm run dev -- --port 3001
+

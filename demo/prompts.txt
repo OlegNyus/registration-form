@@ -1,0 +1,12 @@
+
+I want to add a new page to my website called "Testing Resources" that displays a grid of cards. Each card should have an image, title, brief description, and a link button. The page should be responsive and match the style of my existing website. Please help me implement this step by step
+
+Analyze this component and generate comprehensive user stories that capture all the functionality, including edge cases and error scenarios.
+
+Create a comprehensive test plan for these user stories, including objectives, scope, approach, resources needed, and a testing schedule. Include sections for all relevant testing types
+
+Based on the test plan and user stories for the "Testing Resources" page, generate detailed test cases covering happy paths, boundary conditions, and error scenarios. Include preconditions, steps, expected results, and postconditions for each test case
+
+Convert these manual test cases for the profile management feature into Cypress automation scripts. Include proper selectors, assertions, and follow best practices for reliable test automation
+
+Create comprehensive Jest unit tests for this React component, including tests for all functions, edge cases, and proper mocking of dependencies

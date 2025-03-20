@@ -9,6 +9,7 @@ import LandingPage from './pages/LandingPage';
 import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
 import BlogPostForm from './pages/BlogPostForm';
+import TestingResources from './pages/TestingResources';
 import { CustomersProvider } from './context/CustomersContext';
 import { MdFilesProvider } from './context/MdFilesContext';
 import { BlogProvider } from './context/BlogContext';
@@ -123,6 +124,11 @@ function App() {
         return <MdFilesList category={selectedCategory} onBack={handleBack} />;
       case 'fun-ascii':
         return <FunAscii />;
+      case 'testing-resources':
+        return <TestingResources onBack={() => {
+          setCurrentPage('home');
+          window.location.hash = 'home';
+        }} />;
       case 'blog':
         return (
           <Blog 
@@ -165,47 +171,16 @@ function App() {
   };
 
   return (
-    <div className="App">
+    <div className="min-h-screen">
       <nav className="bg-gray-800 p-4">
         <div className="container mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-6">
-            <a 
-              href="#home" 
-              className="text-white font-bold text-xl hover:text-gray-300 transition-colors duration-200"
-              data-cy="app-logo"
-            >
-              My App
-            </a>
-            <a 
-              href="https://qahub.ai" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-white font-bold text-xl hover:text-gray-300 transition-colors duration-200 flex items-center"
-              data-cy="qahub-link"
-            >
-              QA Hub
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </a>
-            <a 
-              href="https://thetestlab.ai" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="text-white font-bold text-xl hover:text-gray-300 transition-colors duration-200 flex items-center"
-              data-cy="testlab-link"
-            >
-              The Test Lab
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </a>
-          </div>
+          <div className="text-white font-bold text-xl">My App</div>
           <div className="space-x-4">
             <a href="#home" className="text-white hover:text-gray-300">Home</a>
             <a href="#registration" className="text-white hover:text-gray-300">Register</a>
             <a href="#customers" className="text-white hover:text-gray-300">Customers</a>
             <a href="#blog" className="text-white hover:text-gray-300">Blog</a>
+            <a href="#testing-resources" className="text-white hover:text-gray-300">Testing Resources</a>
             <a href="#fun-ascii" className="text-white hover:text-gray-300">Fun ASCII</a>
           </div>
         </div>
