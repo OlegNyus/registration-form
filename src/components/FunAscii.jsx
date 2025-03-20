@@ -27,6 +27,15 @@ const FunAscii = ({ onBack }) => {
     setInputPhrase('');
     setAsciiResult('');
   };
+  
+  // Add keydown handler for Enter key submission
+  const handleKeyDown = (e) => {
+    // Check if Enter was pressed
+    if (e.key === 'Enter' && inputPhrase.trim()) {
+      e.preventDefault(); // Prevent default behavior
+      convertToAscii(); // Convert the input
+    }
+  };
 
   // Replace the rainbow style with a text-stroke animation
   const rainbowTextStyle = {
@@ -99,7 +108,8 @@ const FunAscii = ({ onBack }) => {
                 type="text"
                 value={inputPhrase}
                 onChange={(e) => setInputPhrase(e.target.value)}
-                placeholder="Type something here..."
+                onKeyDown={handleKeyDown}
+                placeholder="Type something here... (Press Enter to convert)"
                 className="flex-grow p-4 bg-indigo-700/50 border border-indigo-600 rounded-l-md text-white focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 transition-all duration-200"
                 data-cy="ascii-input"
               />

@@ -13,6 +13,7 @@ import { CustomersProvider } from './context/CustomersContext';
 import { MdFilesProvider } from './context/MdFilesContext';
 import { BlogProvider } from './context/BlogContext';
 import FunAscii from './components/FunAscii';
+import AI from './components/AI';
 
 function App() {
   const [currentPage, setCurrentPage] = useState(() => {
@@ -159,6 +160,8 @@ function App() {
         );
       case 'under-development':
         return <UnderDevelopment onBack={handleBack} />;
+      case 'ai':
+        return <AI onBack={handleBack} />;
       default:
         return <LandingPage />;
     }
@@ -207,6 +210,7 @@ function App() {
             <a href="#customers" className="text-white hover:text-gray-300">Customers</a>
             <a href="#blog" className="text-white hover:text-gray-300">Blog</a>
             <a href="#fun-ascii" className="text-white hover:text-gray-300">Fun ASCII</a>
+            <a href="#ai" className="text-white hover:text-gray-300">AI</a>
           </div>
         </div>
       </nav>
