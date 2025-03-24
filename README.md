@@ -146,3 +146,17 @@ PORT=3001
 - API keys are stored outside the repository in `~/.api_keys/claude_keys.json`
 - Never commit API keys or sensitive information to the repository
 - The `.gitignore` file is configured to exclude sensitive files
+
+
+
+I want to add a new page to my website called "Testing Resources" that displays a grid of cards. Each card should have an image, title, brief description, and a link button. The page should be responsive and match the style of my existing website. Please help me implement this step by step. Style must be the same as all other pages. Create all logos with their official branding
+
+Analyze this component and generate comprehensive user story that capture all the functionality, including edge cases and error scenarios. Do not include any code there
+
+Create a comprehensive test plan for the user story, including objectives, scope, approach, resources needed, and a testing schedule. Include sections for all relevant testing types
+
+Based on the test plan and user story for the "Testing Resources" page, generate detailed test cases covering happy paths, boundary conditions, and error scenarios. Include preconditions, steps, expected results, and postconditions for each test case
+
+Now I need to automate all test cases using Cypress framework. Create comprehensive scripts for test cases. Include proper selectors, assertions, and follow best practices for reliable test automation. Make sure to guide me step-by-step how to make it runnable
+
+Create comprehensive Jest unit tests for this React component, including tests for all functions, edge cases, and proper mocking of dependencies
