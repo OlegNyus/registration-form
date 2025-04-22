@@ -14,6 +14,7 @@ import { MdFilesProvider } from './context/MdFilesContext';
 import { BlogProvider } from './context/BlogContext';
 import FunAscii from './components/FunAscii';
 import AI from './components/AI';
+import TestingResources from './components/TestingResources';
 
 function App() {
   const [currentPage, setCurrentPage] = useState(() => {
@@ -63,6 +64,9 @@ function App() {
     } else if (currentPage === 'thankyou') {
       setCurrentPage('registration');
       window.location.hash = 'registration';
+    } else if (currentPage === 'testing-resources') {
+      setCurrentPage('home');
+      window.location.hash = 'home';
     } else {
       setCurrentPage('home');
       window.location.hash = 'home';
@@ -123,7 +127,9 @@ function App() {
       case 'mdfiles':
         return <MdFilesList category={selectedCategory} onBack={handleBack} />;
       case 'fun-ascii':
-        return <FunAscii />;
+        return <FunAscii data-cy="fun-ascii-page" />;
+      case 'testing-resources':
+        return <TestingResources onBack={handleBack} data-cy="testing-resources-page" />;
       case 'blog':
         return (
           <Blog 
@@ -161,17 +167,17 @@ function App() {
       case 'under-development':
         return <UnderDevelopment onBack={handleBack} />;
       case 'ai':
-        return <AI onBack={handleBack} />;
+        return <AI onBack={handleBack} data-cy="ai-page"/>;
       default:
-        return <LandingPage />;
+        return <LandingPage data-cy="landing-page-default" />;
     }
   };
 
   return (
-    <div className="App">
-      <nav className="bg-gray-800 p-4">
-        <div className="container mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-6">
+    <div className="App" data-cy="app-container">
+      <nav className="bg-gray-800 p-4" data-cy="navbar">
+        <div className="container mx-auto flex justify-between items-center" data-cy="navbar-container">
+          <div className="flex items-center space-x-6" data-cy="navbar-left-group">
             <a 
               href="#home" 
               className="text-white font-bold text-xl hover:text-gray-300 transition-colors duration-200"
@@ -187,7 +193,7 @@ function App() {
               data-cy="qahub-link"
             >
               QA Hub
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" data-cy="qahub-link-icon">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
               </svg>
             </a>
@@ -199,26 +205,27 @@ function App() {
               data-cy="testlab-link"
             >
               The Test Lab
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" data-cy="testlab-link-icon">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
               </svg>
             </a>
           </div>
-          <div className="space-x-4">
-            <a href="#home" className="text-white hover:text-gray-300">Home</a>
-            <a href="#registration" className="text-white hover:text-gray-300">Register</a>
-            <a href="#customers" className="text-white hover:text-gray-300">Customers</a>
-            <a href="#blog" className="text-white hover:text-gray-300">Blog</a>
-            <a href="#fun-ascii" className="text-white hover:text-gray-300">Fun ASCII</a>
-            <a href="#ai" className="text-white hover:text-gray-300">AI</a>
+          <div className="space-x-4" data-cy="navbar-right-group">
+            <a href="#home" className="text-white hover:text-gray-300" data-cy="nav-link-home">Home</a>
+            <a href="#registration" className="text-white hover:text-gray-300" data-cy="nav-link-register">Register</a>
+            <a href="#customers" className="text-white hover:text-gray-300" data-cy="nav-link-customers">Customers</a>
+            <a href="#blog" className="text-white hover:text-gray-300" data-cy="nav-link-blog">Blog</a>
+            <a href="#fun-ascii" className="text-white hover:text-gray-300" data-cy="nav-link-fun-ascii">Fun ASCII</a>
+            <a href="#ai" className="text-white hover:text-gray-300" data-cy="nav-link-ai">AI</a>
+            <a href="#testing-resources" className="text-white hover:text-gray-300" data-cy="nav-link-testing-resources">Testing Resources</a>
           </div>
         </div>
       </nav>
       
-      <CustomersProvider>
-        <MdFilesProvider>
-          <BlogProvider>
-            {renderPage()}
+      <CustomersProvider data-cy="customers-provider">
+        <MdFilesProvider data-cy="md-files-provider">
+          <BlogProvider data-cy="blog-provider">
+            <div data-cy="page-content-area">{renderPage()}</div>
           </BlogProvider>
         </MdFilesProvider>
       </CustomersProvider>

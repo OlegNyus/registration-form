@@ -116,6 +116,7 @@ const LandingPage = ({ navigateTo }) => {
           <a 
             href="#registration"
             className="inline-block px-6 py-3 bg-indigo-600 text-white rounded-md font-medium hover:bg-indigo-700 transition-colors duration-200 shadow-md"
+            data-cy="get-started-button"
           >
             Get Started
           </a>
