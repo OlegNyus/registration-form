@@ -1,6 +1,7 @@
 import React from 'react';
+import { ArrowRight } from 'lucide-react';
 
-const TestingResources = ({ onBack }) => {
+const TestingResources = () => {
   const testingTools = [
     {
       id: 1,
@@ -14,7 +15,7 @@ const TestingResources = ({ onBack }) => {
       id: 2,
       name: 'Playwright',
       description: 'Reliable end-to-end testing for modern web apps. Playwright enables cross-browser web automation that is ever-green, capable, reliable and fast.',
-      logo: '/assets/testing-logos/playwright.svg',
+      logo: '/assets/testing-logos/playwright.jpeg',
       url: 'https://playwright.dev/',
       dataCy: 'playwright-card'
     },
@@ -53,43 +54,38 @@ const TestingResources = ({ onBack }) => {
   ];
 
   return (
-    <div className="container mx-auto px-4 py-8" data-cy="testing-resources-container">
-      <div className="flex justify-between items-center mb-8" data-cy="testing-resources-header">
-        <h1 className="text-3xl font-bold text-gray-800" data-cy="testing-resources-title">Testing Resources</h1>
-        <button 
-          onClick={onBack}
-          className="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700 transition-colors"
-          data-cy="testing-resources-back-button"
-        >
-          Back
-        </button>
-      </div>
-      
-      <p className="text-lg text-gray-600 mb-8" data-cy="testing-resources-intro">
-        Explore these powerful testing tools to improve your application quality and reliability.
-      </p>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" data-cy="testing-resources-grid">
-        {testingTools.map((tool) => (
-          <div key={tool.id} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 transition-all duration-300 hover:shadow-lg" data-cy={tool.dataCy}>
-            <div className="p-6 flex flex-col h-full" data-cy={`${tool.dataCy}-content-wrapper`}>
-              <div className="flex justify-center items-center h-24 mb-4" data-cy={`${tool.dataCy}-logo-container`}>
-                <img src={tool.logo} alt={`${tool.name} logo`} className="max-h-16 max-w-full" data-cy={`${tool.dataCy}-logo`} />
+    <div className="bg-gradient-to-br from-blue-900 to-purple-900 min-h-screen p-8" data-cy="testing-resources-page-wrapper">
+      <div className="container mx-auto px-4 py-8" data-cy="testing-resources-container">
+        <div className="flex justify-start items-center mb-8" data-cy="testing-resources-header">
+          <h1 className="text-3xl font-bold text-white" data-cy="testing-resources-title">Testing Resources</h1>
+        </div>
+        
+        <p className="text-lg text-white/80 mb-8" data-cy="testing-resources-intro">
+          Explore these powerful testing tools to improve your application quality and reliability.
+        </p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" data-cy="testing-resources-grid">
+          {testingTools.map((tool) => (
+            <div key={tool.id} className="bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden shadow-lg transition-transform hover:transform hover:scale-105" data-cy={tool.dataCy}>
+              <div className="p-6 flex flex-col h-full" data-cy={`${tool.dataCy}-content-wrapper`}>
+                <div className="flex justify-center items-center h-20 mb-6" data-cy={`${tool.dataCy}-logo-container`}>
+                  <img src={tool.logo} alt={`${tool.name} logo`} className="max-h-16 max-w-[80%] object-contain" data-cy={`${tool.dataCy}-logo`} />
+                </div>
+                <h2 className="text-xl font-bold text-white text-center mb-2" data-cy={`${tool.dataCy}-title`}>{tool.name}</h2>
+                <p className="text-white/70 mb-4 flex-grow text-center" data-cy={`${tool.dataCy}-description`}>{tool.description}</p>
+                <a 
+                  href={tool.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="mt-auto inline-flex items-center justify-center text-indigo-300 hover:text-indigo-400 transition-colors duration-200 font-medium"
+                  data-cy={`${tool.dataCy}-learn-more-button`}
+                >
+                  Learn More <ArrowRight className="ml-2 w-4 h-4" />
+                </a>
               </div>
-              <h2 className="text-xl font-semibold text-center text-gray-800 mb-3" data-cy={`${tool.dataCy}-title`}>{tool.name}</h2>
-              <p className="text-gray-600 mb-6 flex-grow" data-cy={`${tool.dataCy}-description`}>{tool.description}</p>
-              <a 
-                href={tool.url} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="bg-gray-800 text-white py-2 px-4 rounded text-center font-medium hover:bg-gray-700 transition-colors duration-300"
-                data-cy={`${tool.dataCy}-learn-more-button`}
-              >
-                Learn More
-              </a>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
