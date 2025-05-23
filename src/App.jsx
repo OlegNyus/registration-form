@@ -15,6 +15,7 @@ import { BlogProvider } from './context/BlogContext';
 import FunAscii from './components/FunAscii';
 import AI from './components/AI';
 import TestingResources from './components/TestingResources';
+import SQALearningGuide from './components/SQALearningGuide';
 
 function App() {
   const [currentPage, setCurrentPage] = useState(() => {
@@ -168,6 +169,8 @@ function App() {
         return <UnderDevelopment onBack={handleBack} />;
       case 'ai':
         return <AI onBack={handleBack} data-cy="ai-page"/>;
+      case 'sqa-learning':
+        return <SQALearningGuide onBack={handleBack} data-cy="sqa-learning-page" />;
       default:
         return <LandingPage data-cy="landing-page-default" />;
     }
@@ -218,6 +221,7 @@ function App() {
             <a href="#fun-ascii" className="text-white hover:text-gray-300" data-cy="nav-link-fun-ascii">Fun ASCII</a>
             <a href="#ai" className="text-white hover:text-gray-300" data-cy="nav-link-ai">AI</a>
             <a href="#testing-resources" className="text-white hover:text-gray-300" data-cy="nav-link-testing-resources">Testing Resources</a>
+            <a href="#sqa-learning" className="text-white hover:text-gray-300" data-cy="nav-link-sqa-learning">SQA Learning</a>
           </div>
         </div>
       </nav>
