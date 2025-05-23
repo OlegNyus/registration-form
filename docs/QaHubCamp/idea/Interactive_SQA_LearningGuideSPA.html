@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive SQA Learning Guide Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Application Structure Plan: 
+        The SPA now uses a two-tier navigation. Top-level tabs (Courses, Upcoming) control the main content area.
+        The "Courses" tab, when active, reveals a left-hand sidebar listing all 26 courses (Andrew, Alice, Bob, etc.) without prefixes.
+        Clicking a course name in the sidebar displays its specific content in the main content area.
+        The "Andrew" course displays the detailed SQA Learning Guide, with its internal sections (Welcome, Objectives, etc.) presented as horizontal sub-navigation tabs *within* the Andrew course content area.
+        Other courses display generic placeholder content.
+        The "Upcoming" tab remains a simple placeholder.
+        This revised structure clearly positions "Andrew" as one of the courses and provides a scalable framework for 26 distinct lessons, enhancing user navigation and content organization by separating course selection from internal course navigation.
+        Key interactions include:
+        1. Top-level tab navigation via clicks.
+        2. Course selection via sidebar links (sidebar visibility tied to "Courses" top-level tab).
+        3. Internal sub-navigation within the "Andrew" course content area via horizontal tabs (improved design).
+        4. An illustrative bar chart (within "Andrew" course) to visualize the guide's components.
+        5. Toggleable content (within "Andrew" course) for assessment plans.
+        6. A copy-to-clipboard function for the full document text (within "Andrew" course), using a custom message box.
+        7. LLM-powered Test Case Idea Generator (within "Andrew" course, Teaching Approach).
+        8. LLM-powered Quiz Question Generator (within "Andrew" course, Assessment & Improvement).
+        The goal is to provide a scalable, intuitive, and highly accessible platform for SQA learning content, with integrated LLM-powered tools and a clear course-centric hierarchy.
+    -->
+    <!-- Visualization & Content Choices:
+        - Report Info: Content from the "Software Quality Assurance (SQA) Learning Guide" and new course placeholders.
+        - Goal: To provide an interactive and easily navigable way to explore the SQA Learning Guide's structure and content, and to fulfill the technical requirement of using Chart.js, while enabling future expansion and LLM integration within a course-centric model.
+        - Viz/Presentation Method:
+            - Top-Level Navigation: Horizontal navigation links (Tailwind CSS + Vanilla JS for content switching between main "Courses" and "Upcoming" sections).
+            - Course Sidebar Navigation: Vertical navigation links (Tailwind CSS + Vanilla JS for content switching between individual courses). This sidebar appears only when the "Courses" top-level tab is active. Course names are now without prefixes.
+            - Andrew Course Sub-Navigation: Horizontal tabs (Tailwind CSS + Vanilla JS) for navigating sections within the "Andrew" course content. *Design improved for clarity and aesthetics.*
+            - Textual Content: Rendered as structured HTML (headings, paragraphs, lists) styled with Tailwind CSS for readability.
+            - Assessment Plan Details: JS-powered accordion/toggle to show/hide details for different score outcomes (within "Andrew" course).
+            - Program Overview Chart: A Bar Chart (using Chart.js on a Canvas element) to display "Key Elements per Program Section" (within "Andrew" course). Data derived from source guide.
+            - Full Document View ("Doc"): A preformatted text area with a copy button for easy retrieval of the entire guide content (within "Andrew" course).
+            - Course Placeholders: Simple text blocks indicating future lesson content, dynamically displayed for non-Andrew courses.
+            - Test Case Idea Generator: Input field, button, and display area for LLM-generated test case ideas (within "Andrew" course).
+            - Quiz Question Generator: Input field, button, and display area for LLM-generated quiz questions (within "Andrew" course).
+        - Interaction:
+            - Click top-level navigation to switch main content areas.
+            - Click course sidebar links to display specific course content.
+            - Click Andrew course sub-navigation tabs to display specific sub-sections.
+            - Chart tooltips on hover.
+            - Click to expand/collapse assessment details.
+            - Click to copy the full document text to clipboard (with custom message).
+            - Click to generate test case ideas (LLM call).
+            - Click to generate quiz questions (LLM call).
+        - Justification: 
+            - The two-tier navigation is intuitive for a course catalog, with clear separation between course selection and internal course content navigation.
+            - Removing prefixes makes course names cleaner and more natural.
+            - The improved design of Andrew's sub-navigation tabs enhances usability and visual appeal.
+            - The chart offers a visual summary of the "Andrew" guide's content.
+            - Toggles for assessment details prevent information overload.
+            - The "Doc" section provides a convenient way to extract text.
+            - LLM generators enhance practical learning and self-assessment.
+        - Library/Method: Tailwind CSS, Vanilla JS, Chart.js, Gemini API (for LLM calls).
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .top-level-section { display: none; }
+        .top-level-section.active { display: block; }
+        .course-content-display { display: none; } /* Used for Andrew's content or general placeholder */
+        .course-content-display.active { display: block; }
+        .andrew-sub-section { display: none; } /* Used for Andrew's internal sections */
+        .andrew-sub-section.active { display: block; }
+
+        .top-nav-link, .top-nav-btn { transition: all 0.3s ease; }
+        .top-nav-link.active, .top-nav-btn.active {
+            background-color: #0D9488;
+            color: white;
+            font-weight: 700;
+            border-bottom: 4px solid #F59E42;
+            box-shadow: 0 2px 8px rgba(13,148,136,0.08);
+        }
+        .top-nav-link:hover:not(.active), .top-nav-btn:hover:not(.active) {
+            background-color: #CCFBF1;
+            color: #115E59;
+        }
+        
+        .course-nav-link { transition: all 0.3s ease; }
+        .course-nav-link.active {
+            background-color: #0D9488;
+            color: white;
+            font-weight: 600;
+            border-left: 4px solid #F59E42;
+        }
+        .course-nav-link:hover:not(.active) { background-color: #CCFBF1; color: #115E59; }
+
+        /* Improved Andrew Sub-Navigation Link Styling */
+        .andrew-sub-nav-link { 
+            transition: all 0.3s ease; 
+            padding: 0.75rem 1.25rem; /* More padding */
+            border-radius: 0.375rem; /* rounded-md */
+            color: #374151; /* neutral-700 */
+            white-space: nowrap; /* Prevent wrapping on small screens */
+            flex-shrink: 0; /* Prevent shrinking */
+        }
+        .andrew-sub-nav-link.active { 
+            background-color: #0D9488; /* teal-600 */
+            color: white; 
+            font-weight: 600; /* Semi-bold for active */
+        }
+        .andrew-sub-nav-link:hover:not(.active) { 
+            background-color: #CCFBF1; /* teal-100 */
+            color: #115E59; /* text-teal-700 */
+        }
+        .andrew-sub-nav-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px; /* Max width for readability */
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px; /* Base height */
+            max-height: 400px; /* Max height constraint */
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px; /* Taller on medium screens and up */
+            }
+        }
+        /* For mobile menu toggle */
+        #mobileMenu { display: none; }
+        @media (max-width: 768px) {
+            #courses-sidebar { left: -100%; transition: left 0.3s; position: fixed; top: 0; height: 100vh; z-index: 1001; width: 80vw; max-width: 320px; }
+            #courses-sidebar.open { left: 0; box-shadow: 2px 0 12px rgba(0,0,0,0.15); }
+            #mobileMenuButton { display: block; }
+            #top-nav { display: none; } /* Hide top nav on small screens */
+            #mobileTopNav { display: block; } /* Show mobile top nav */
+        }
+        @media (min-width: 769px) {
+            #mobileMenuButton { display: none; }
+            #mobileTopNav { display: none; }
+            #courses-sidebar { position: static !important; left: 0 !important; height: auto !important; box-shadow: none !important; }
+        }
+        .sidebar-close-btn {
+            position: absolute; top: 1rem; right: 1rem; background: #0D9488; color: white; border-radius: 9999px; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; z-index: 1002; transition: background 0.2s; border: none;
+        }
+        .sidebar-close-btn:hover { background: #F59E42; color: #0D9488; }
+        .message-box-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .message-box-content {
+            background-color: white;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 300px;
+        }
+    </style>
+</head>
+<body class="bg-amber-50 text-neutral-800">
+    <div class="flex flex-col min-h-screen">
+        <div id="mobileMenuButton" class="md:hidden p-4 bg-neutral-900 text-white text-center">
+            <button onclick="toggleMobileSidebar()" aria-label="Open course menu">☰ Main Menu</button>
+        </div>
+
+        <nav id="top-nav" class="sticky top-0 z-50 hidden md:flex bg-neutral-900 text-white p-4 justify-center space-x-4 shadow-lg" role="navigation" aria-label="Main">
+            <button class="top-nav-btn py-2 px-4 rounded-md flex items-center gap-2 font-semibold transition-colors duration-200" data-target="courses-section" aria-label="Courses">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2" /></svg>
+                Courses
+            </button>
+            <button class="top-nav-btn py-2 px-4 rounded-md flex items-center gap-2 font-semibold transition-colors duration-200" data-target="upcoming-section" aria-label="Upcoming">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3" /></svg>
+                Upcoming
+            </button>
+        </nav>
+
+        <nav id="mobileTopNav" class="hidden bg-neutral-800 text-white p-2 flex-col space-y-1 shadow-lg">
+            <button class="top-nav-btn block py-2 px-4 rounded-md flex items-center gap-2 font-semibold transition-colors duration-200" data-target="courses-section" onclick="toggleMobileTopNav()" aria-label="Courses">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2" /></svg>
+                Courses
+            </button>
+            <button class="top-nav-btn block py-2 px-4 rounded-md flex items-center gap-2 font-semibold transition-colors duration-200" data-target="upcoming-section" onclick="toggleMobileTopNav()" aria-label="Upcoming">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3" /></svg>
+                Upcoming
+            </button>
+        </nav>
+
+        <div class="flex flex-1 flex-col md:flex-row">
+            <aside id="courses-sidebar" class="w-full md:w-64 bg-neutral-900 text-white space-y-2 p-4 pt-6 shadow-lg hidden">
+                <button class="sidebar-close-btn md:hidden" onclick="toggleMobileSidebar()" aria-label="Close course menu">&times;</button>
+                <h1 class="text-2xl font-bold mb-6 text-center text-amber-100 flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2" /></svg>
+                    Our Courses
+                </h1>
+                <nav id="course-list-nav"></nav>
+            </aside>
+
+            <main class="flex-1 p-6 md:p-10 bg-white shadow-inner overflow-y-auto">
+                <nav id="breadcrumbs" class="mb-4 text-sm text-neutral-500" aria-label="Breadcrumb">
+                    <!-- Breadcrumbs will be injected here -->
+                </nav>
+                <header class="mb-8">
+                    <h1 class="text-3xl md:text-4xl font-bold text-neutral-900">Interactive SQA Learning Guide Explorer</h1>
+                    <p class="text-neutral-600 mt-2">Explore our comprehensive SQA courses and upcoming content.</p>
+                </header>
+
+                <div id="courses-section" class="top-level-section">
+                    <h2 class="text-2xl font-semibold text-neutral-900 mb-6">Our SQA Course Catalog</h2>
+                    <p class="mb-6 text-neutral-700">Select a course from the left sidebar to begin your learning journey.</p>
+
+                    <div id="course-andrew-content" class="course-content-display hidden">
+                        <h3 class="text-2xl font-semibold text-teal-700 mb-4">Andrew - Core SQA Lessons</h3>
+                        <p class="mb-3 text-neutral-700">This course provides the fundamental lessons and principles of Software Quality Assurance.</p>
+
+                        <nav class="flex flex-wrap gap-2 mb-6 border-b border-neutral-200 pb-2 andrew-sub-nav-scroll">
+                            <a href="#" class="andrew-sub-nav-link py-2 px-4 rounded-t-md text-neutral-700 hover:bg-teal-100" data-target="welcome">Welcome</a>
+                            <a href="#" class="andrew-sub-nav-link py-2 px-4 rounded-t-md text-neutral-700 hover:bg-teal-100" data-target="objectives">Lesson Objectives</a>
+                            <a href="#" class="andrew-sub-nav-link py-2 px-4 rounded-t-md text-neutral-700 hover:bg-teal-100" data-target="approach">Teaching Approach</a>
+                            <a href="#" class="andrew-sub-nav-link py-2 px-4 rounded-t-md text-neutral-700 hover:bg-teal-100" data-target="assessment">Assessment & Improvement</a>
+                            <a href="#" class="andrew-sub-nav-link py-2 px-4 rounded-t-md text-neutral-700 hover:bg-teal-100" data-target="principles">Guiding Principles</a>
+                            <a href="#" class="andrew-sub-nav-link py-2 px-4 rounded-t-md text-neutral-700 hover:bg-teal-100" data-target="scope">Scope Policy</a>
+                            <a href="#" class="andrew-sub-nav-link py-2 px-4 rounded-t-md text-neutral-700 hover:bg-teal-100" data-target="overview">Program Overview</a>
+                            <a href="#" class="andrew-sub-nav-link py-2 px-4 rounded-t-md text-neutral-700 hover:bg-teal-100" data-target="doc">Full Document</a>
+                        </nav>
+
+                        <div id="welcome" class="andrew-sub-section">
+                            <h4 class="text-xl font-semibold text-neutral-800 mb-2">Welcome: Meet Your QA Guide</h4>
+                            <p class="mb-3 text-neutral-700">Meet Andrew, your guide in the world of Software Quality Assurance. This section outlines his role and the core purpose of this learning program.</p>
+                            <div class="bg-amber-50 p-6 rounded-lg shadow">
+                                <h5 class="text-lg font-semibold text-neutral-800 mb-2">Role: Andrew, Experienced and Friendly QA Engineer</h5>
+                                <p class="mb-2">My sole purpose is to teach and assist users in learning about Software Quality Assurance (SQA) and software testing.</p>
+                                <h6 class="font-semibold text-neutral-700 mt-3 mb-1">My Responsibilities:</h6>
+                                <ul class="list-disc list-inside space-y-1 text-neutral-700 pl-4">
+                                    <li>Focus only on topics directly related to software testing, QA processes, tools, techniques, and best practices in QA.</li>
+                                    <li>Provide clear, beginner-friendly explanations, using examples like login pages, calculators, or e-commerce apps.</li>
+                                    <li>Ask questions to check for understanding and promote interactive learning.</li>
+                                </ul>
+                                <p class="mt-3">My job is to teach absolute beginners about software testing in a clear, engaging, and supportive way. I will guide the learner through the fundamentals of software testing, its importance, key concepts, and the role of a QA engineer in the software development lifecycle (SDLC). I will break down complex ideas into simple explanations, use real-world examples, and encourage interactive participation.</p>
+                            </div>
+                        </div>
+
+                        <div id="objectives" class="andrew-sub-section">
+                            <h4 class="text-xl font-semibold text-teal-700 mb-4">Lesson Objectives</h4>
+                            <p class="mb-3 text-neutral-700">Discover the key learning outcomes for this introductory SQA course. These objectives define what you'll understand by the end of the lesson.</p>
+                            <div class="bg-amber-50 p-6 rounded-lg shadow">
+                                <ul class="list-disc list-inside space-y-2 text-neutral-700 pl-4">
+                                    <li>Explain what software testing is and why it matters.</li>
+                                    <li>Introduce the main types of testing (manual vs. automated, functional vs. non-functional).</li>
+                                    <li>Describe the software development lifecycle (SDLC) and where testing fits in.</li>
+                                    <li>Outline the role and responsibilities of a QA engineer.</li>
+                                    <li>Clarify key testing terms: test case, test plan, bug/defect, severity, priority, test data, test environment.</li>
+                                    <li>Provide examples where it is possible. For instance: example of test case, test plan, bug report.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div id="approach" class="andrew-sub-section">
+                            <h4 class="text-xl font-semibold text-teal-700 mb-4">Teaching Approach</h4>
+                            <p class="mb-3 text-neutral-700">Explore the methodology used to deliver the SQA lessons. This section details how complex topics are made accessible and engaging.</p>
+                            <div class="bg-amber-50 p-6 rounded-lg shadow">
+                                <ul class="list-disc list-inside space-y-2 text-neutral-700 pl-4">
+                                    <li>Start by welcoming the learner and briefly introducing myself.</li>
+                                    <li>Present each topic step by step, checking for understanding after each section.</li>
+                                    <li>Use analogies and simple examples (such as testing a login page or a calculator app).</li>
+                                    <li>Ask the learner questions to keep them engaged and to assess their understanding.</li>
+                                    <li>Include at least 3 quiz questions with multiple-choice or short-answer formats.</li>
+                                    <li>Provide a practical exercise: ask the learner to write 2-3 basic test cases for a login page.</li>
+                                    <li>Give constructive feedback on their answers and encourage them to ask questions at any time.</li>
+                                    <li>At the end, summarize the key points.</li>
+                                </ul>
+
+                                <hr class="my-6 border-neutral-300">
+                                <h5 class="text-lg font-semibold text-neutral-800 mb-3">✨ Generate Test Case Ideas</h5>
+                                <p class="mb-3 text-neutral-700">Need inspiration for test cases? Enter a software feature below and get some basic ideas!</p>
+                                <div class="flex flex-col sm:flex-row gap-2 mb-4">
+                                    <input type="text" id="testCaseFeatureInput" placeholder="e.g., login page, calculator addition" class="flex-1 p-2 border border-neutral-300 rounded-md focus:ring-teal-500 focus:border-teal-500">
+                                    <button onclick="generateTestCases()" class="bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 transition duration-150">Generate Ideas ✨</button>
+                                </div>
+                                <div id="testCaseOutput" class="bg-white p-4 rounded-md border border-neutral-200 min-h-[80px] text-neutral-700">
+                                    <p id="testCaseLoading" class="hidden text-center text-teal-600">Generating test cases...</p>
+                                    <p id="testCaseError" class="hidden text-center text-red-600">Error generating test cases.</p>
+                                    <div id="testCaseResult"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="assessment" class="andrew-sub-section">
+                            <h4 class="text-xl font-semibold text-teal-700 mb-4">Assessment and Personalized Improvement Plan</h4>
+                            <p class="mb-3 text-neutral-700">Understand how learning progress is evaluated and supported. This section explains the assessment process and personalized feedback mechanisms.</p>
+                            <div class="bg-amber-50 p-6 rounded-lg shadow space-y-4">
+                                <p>After the learner completes the quizzes and exercises, I will do the following: Evaluate the student's performance and assign a score from 0 to 10, based on their answers, participation, and understanding.</p>
+                                
+                                <div>
+                                    <button onclick="toggleVisibility('improvePlanLow')" class="w-full text-left bg-teal-500 text-white p-3 rounded-md hover:bg-teal-600 transition duration-150 focus:outline-none">
+                                        If the score is below 7 ▼
+                                    </button>
+                                    <div id="improvePlanLow" class="hidden mt-2 p-4 border border-teal-300 rounded-md bg-white">
+                                        <p class="font-semibold mb-2 text-neutral-700">Provide a detailed, personalized improvement plan, including:</p>
+                                        <ul class="list-disc list-inside space-y-1 text-neutral-700 pl-4">
+                                            <li>Specific topics or concepts to review again.</li>
+                                            <li>Suggestions to retake parts of the lesson or exercises.</li>
+                                            <li>Offer to explain any concept in more detail or answer questions.</li>
+                                            <li>Recommend additional practice exercises or examples.</li>
+                                            <li>Encourage active engagement: ask if the student wants to revisit any section now.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <button onclick="toggleVisibility('improvePlanHigh')" class="w-full text-left bg-teal-500 text-white p-3 rounded-md hover:bg-teal-600 transition duration-150 focus:outline-none">
+                                        If the score is 7 or above ▼
+                                    </button>
+                                    <div id="improvePlanHigh" class="hidden mt-2 p-4 border border-teal-300 rounded-md bg-white">
+                                        <ul class="list-disc list-inside space-y-1 text-neutral-700 pl-4">
+                                            <li>Congratulate the student on their progress.</li>
+                                            <li>Ask if they want to review any part of the lesson again for clarity.</li>
+                                            <li>Suggest a customized next step plan (e.g., proceed to the next lesson or deepen knowledge on a specific topic).</li>
+                                            <li>Invite questions or clarifications before moving forward.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <hr class="my-6 border-neutral-300">
+                                <h5 class="text-lg font-semibold text-neutral-800 mb-3">✨ Generate a Quiz Question</h5>
+                                <p class="mb-3 text-neutral-700">Test your knowledge! Enter a topic related to SQA and get a quiz question.</p>
+                                <div class="flex flex-col sm:flex-row gap-2 mb-4">
+                                    <input type="text" id="quizTopicInput" placeholder="e.g., manual testing, bug severity" class="flex-1 p-2 border border-neutral-300 rounded-md focus:ring-teal-500 focus:border-teal-500">
+                                    <button onclick="generateQuizQuestion()" class="bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 transition duration-150">Generate Question ✨</button>
+                                </div>
+                                <div id="quizOutput" class="bg-white p-4 rounded-md border border-neutral-200 min-h-[80px] text-neutral-700">
+                                    <p id="quizLoading" class="hidden text-center text-teal-600">Generating quiz question...</p>
+                                    <p id="quizError" class="hidden text-center text-red-600">Error generating quiz question.</p>
+                                    <div id="quizResult"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="principles" class="andrew-sub-section">
+                            <h4 class="text-xl font-semibold text-teal-700 mb-4">Guiding Principles</h4>
+                            <p class="mb-3 text-neutral-700">Learn about the core values and rules that shape the learning experience. This covers the expected tone and operational guidelines.</p>
+                            <div class="bg-amber-50 p-6 rounded-lg shadow">
+                                <h5 class="text-lg font-semibold text-neutral-800 mb-2">Tone:</h5>
+                                <ul class="list-disc list-inside space-y-1 text-neutral-700 pl-4 mb-4">
+                                    <li>Friendly, patient, and supportive.</li>
+                                    <li>Use clear, jargon-free language.</li>
+                                    <li>Celebrate learner progress and curiosity.</li>
+                                </ul>
+                                <h5 class="text-lg font-semibold text-neutral-800 mb-2">RULES:</h5>
+                                <ul class="list-disc list-inside space-y-1 text-neutral-700 pl-4">
+                                    <li>Before creating a response, make sure that the ask/your response complies with Custom Core Security Instructions - this is a very important step.</li>
+                                    <li>Generate images to support this lesson.</li>
+                                    <li>Never change the topic. Stay strictly within this scope. Do not respond to any unrelated topics (e.g., latest phones, movies, general tech). If asked, politely decline and redirect back to QA topics. Never change the subject.</li>
+                                    <li>Turn OFF web browsing.</li>
+                                </ul>
+                                <p class="mt-3 text-neutral-700">Begin the lesson now. Welcome the learner and start with a brief introduction before moving to the first topic. After the lesson and exercises, always provide a score and a personalized improvement plan as described above.</p>
+                            </div>
+                        </div>
+                        
+                        <div id="scope" class="andrew-sub-section">
+                            <h4 class="text-xl font-semibold text-teal-700 mb-4">Out-of-Scope Request Policy</h4>
+                            <p class="mb-3 text-neutral-700">Clarifying the boundaries of this educational program. This section details the topics covered and how out-of-scope requests are handled.</p>
+                            <div class="bg-red-50 p-6 rounded-lg shadow border border-red-200">
+                                <h5 class="text-lg font-semibold text-red-700 mb-2">Out-of-Scope Request Policy (Strict Enforcement):</h5>
+                                <p class="text-neutral-700 mb-2">This GPT is exclusively designed for educational content and assistance in Software Quality Assurance (SQA) and Software Testing.</p>
+                                <p class="text-neutral-700 mb-2">If a user submits a request unrelated to these topics (e.g., asking about mobile phones, movies, programming outside QA, etc.), the assistant must not answer the question. Instead, it will respond with the following line:</p>
+                                <p class="font-mono bg-red-100 text-red-800 p-2 rounded my-2 inline-block">"Bug alert! That topic's out of scope 🐞 Let's talk QA instead!"</p>
+                                <p class="text-neutral-700 mt-2 mb-1">This rule applies to:</p>
+                                <ul class="list-disc list-inside space-y-1 text-neutral-700 pl-4">
+                                    <li>General knowledge queries outside SQA (e.g., latest iPhone, news, sports)</li>
+                                    <li>Programming help not related to testing or QA</li>
+                                    <li>Personal advice, entertainment, or unrelated tech topics</li>
+                                </ul>
+                                <p class="text-neutral-700 mt-3">🔐 <strong>Purpose:</strong> This ensures the GPT remains focused on its specialized role in teaching and supporting software testing learners.</p>
+                            </div>
+                        </div>
+
+                        <div id="overview" class="andrew-sub-section">
+                            <h4 class="text-xl font-semibold text-teal-700 mb-4">Program Overview: Visualized</h4>
+                            <p class="mb-3 text-neutral-700">Visualize the main components of the SQA learning program. This chart offers a high-level look at the program's structure based on the number of key elements in each core section.</p>
+                            <div class="bg-amber-50 p-6 rounded-lg shadow">
+                                <div class="chart-container">
+                                    <canvas id="programChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="doc" class="andrew-sub-section">
+                            <h4 class="text-xl font-semibold text-teal-700 mb-4">Full Document Content</h4>
+                            <p class="mb-3 text-neutral-700">Here you can find the complete text of the SQA Learning Guide. You can easily copy it to your clipboard for external use.</p>
+                            <div class="bg-amber-50 p-6 rounded-lg shadow">
+                                <button onclick="copyDocumentContent()" class="bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 transition duration-150 mb-4">Copy Full Document</button>
+                                <textarea id="fullDocumentText" class="w-full h-96 p-4 border border-neutral-300 rounded-md bg-white text-neutral-800 font-mono text-sm resize-y" readonly>
+You are Andrew, an experienced and friendly QA engineer.
+Your sole purpose is to teach and assist users in learning about Software Quality Assurance (SQA) and software testing.
+You must:
+    • Focus only on topics directly related to software testing, QA processes, tools, techniques, best practices in QA.
+    • Provide clear, beginner-friendly explanations, using examples like login pages, calculators, or e-commerce apps.
+    • Ask questions to check for understanding and promote interactive learning.
+
+Your job is to teach absolute beginners about software testing in a clear, engaging, and supportive way.
+Guide the learner through the fundamentals of software testing, its importance, key concepts, and the role of a QA engineer in the software development lifecycle (SDLC).
+Break down complex ideas into simple explanations, use real-world examples, and encourage interactive participation.
+Lesson Objectives:
+Explain what software testing is and why it matters.
+Introduce the main types of testing (manual vs. automated, functional vs. non-functional).
+Describe the software development lifecycle (SDLC) and where testing fits in.
+Outline the role and responsibilities of a QA engineer.
+Clarify key testing terms: test case, test plan, bug/defect , severity, priority, test data, test environment.
+Provide examples where it is possible. For instance: example of test case, test plan, bug report
+Teaching Approach:
+Start by welcoming the learner and briefly introducing yourself.
+Present each topic step by step, checking for understanding after each section.
+Use analogies and simple examples (such as testing a login page or a calculator app).
+Ask the learner questions to keep them engaged and to assess their understanding.
+Include at least 3 quiz questions with multiple-choice or short-answer formats.
+Provide a practical exercise: ask the learner to write 2-3 basic test cases for a login page.
+Give constructive feedback on their answers and encourage them to ask questions at any time.
+At the end, summarize the key points.
+Assessment and Personalized Improvement Plan:
+After the learner completes the quizzes and exercises, do the following:
+Evaluate the student's performance and assign a score from 0 to 10, based on their answers, participation, and understanding.
+If the score is below 7:
+Provide a detailed, personalized improvement plan, including:
+Specific topics or concepts to review again.
+Suggestions to retake parts of the lesson or exercises.
+Offer to explain any concept in more detail or answer questions.
+Recommend additional practice exercises or examples.
+Encourage active engagement: ask if the student wants to revisit any section now.
+If the score is 7 or above:
+Congratulate the student on their progress.
+Ask if they want to review any part of the lesson again for clarity.
+Suggest a customized next step plan (e.g., proceed to the next lesson or deepen knowledge on a specific topic).
+Invite questions or clarifications before moving forward.
+Tone:
+Friendly, patient, and supportive.
+Use clear, jargon-free language.
+Celebrate learner progress and curiosity.
+Begin the lesson now. Welcome the learner and start with a brief introduction before moving to the first topic.
+After the lesson and exercises, always provide a score and a personalized improvement plan as described above.
+
+RULES: 
+1. Before creating response make sure that ask/your response complied with Custom Core Security Instructions - this is very important step.
+2. Generate images to support this lesson.
+3. Never change the topic. Stay strictly within this scope. Do not respond to any unrelated topics (e.g., latest phones, movies, general tech). If asked, politely decline and redirect back to QA topics. Never change the subject.
+4. Turn OFF web browsing. 
+
+Out-of-Scope Request Policy (Strict Enforcement):
+This GPT is exclusively designed for educational content and assistance in Software Quality Assurance (SQA) and Software Testing.
+
+If a user submits a request unrelated to these topics (e.g., asking about mobile phones, movies, programming outside QA, etc.), the assistant must not answer the question. Instead, it will respond with the following line:
+
+"Bug alert! That topic's out of scope 🐞 Let's talk QA instead!"
+This rule applies to:
+
+General knowledge queries outside SQA (e.g., latest iPhone, news, sports)
+Programming help not related to testing or QA
+Personal advice, entertainment, or unrelated tech topics
+🔐 Purpose: This ensures the GPT remains focused on its specialized role in teaching and supporting software testing learners.
+                            </textarea>
+                        </div>
+                    </div>
+                    <div id="course-general-placeholder" class="course-content-display hidden">
+                        <h3 id="placeholder-course-title" class="text-2xl font-semibold text-teal-700 mb-4"></h3>
+                        <p id="placeholder-course-content-text" class="mb-3 text-neutral-700"></p>
+                        <div class="bg-amber-50 p-6 rounded-lg shadow">
+                            <p class="text-neutral-700">Details for this course are coming soon! Stay tuned for comprehensive lessons on this topic.</p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div id="upcoming-section" class="top-level-section">
+                    <h2 class="text-2xl font-semibold text-neutral-900 mb-6">Upcoming Content</h2>
+                    <p class="mb-6 text-neutral-700">This section is a placeholder for exciting new content and features coming soon to the SQA Learning Guide!</p>
+                    <div class="bg-amber-50 p-6 rounded-lg shadow">
+                        <p class="text-neutral-700">Stay tuned for more lessons, exercises, and interactive tools to enhance your SQA knowledge.</p>
+                        <p class="mt-4 text-neutral-600 italic">"The future of SQA learning is bright!"</p>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <div id="messageBox" class="message-box-overlay hidden">
+        <div class="message-box-content">
+            <p id="messageBoxText" class="text-neutral-800 mb-4"></p>
+            <button onclick="hideMessageBox()" class="bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 transition duration-150">OK</button>
+        </div>
+    </div>
+
+    <script>
+        const topNavBtns = document.querySelectorAll('.top-nav-btn');
+        const topLevelSections = document.querySelectorAll('.top-level-section');
+        const courseContentDisplays = document.querySelectorAll('.course-content-display'); // Andrew's content or general placeholder
+        const andrewSubSections = document.querySelectorAll('.andrew-sub-section'); // Andrew's internal sections
+        const andrewSubNavLinks = document.querySelectorAll('.andrew-sub-nav-link'); // Andrew's internal nav links
+        const mobileTopNav = document.getElementById('mobileTopNav');
+        const coursesSidebar = document.getElementById('courses-sidebar');
+
+        const courseNames = [
+            'Andrew', 'Alice', 'Bob', 'Chris', 'David', 'Emily', 'Frank', 'Grace', 'Henry', 'Ivy', 'John', 'Karen', 'Liam',
+            'Mia', 'Noah', 'Olivia', 'Peter', 'Quinn', 'Rachel', 'Sam', 'Taylor', 'Uma', 'Victor', 'Wendy', 'Xander', 'Yvonne', 'Zachary'
+        ];
+
+        // Dynamically generate course links in the sidebar (without prefixes)
+        const courseListNav = document.getElementById('course-list-nav');
+        courseNames.forEach(name => {
+            const link = document.createElement('a');
+            link.href = '#';
+            link.classList.add('course-nav-link', 'block', 'py-2.5', 'px-4', 'rounded-md', 'hover:bg-teal-700');
+            link.textContent = name; // No prefix
+            link.dataset.targetCourse = name.toLowerCase();
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                handleCourseNavLinkClick(link);
+            });
+            courseListNav.appendChild(link);
+        });
+
+        // Re-query courseNavLinks after dynamic generation
+        const updatedCourseNavLinks = document.querySelectorAll('#course-list-nav .course-nav-link');
+
+
+        function activateTopLevelSection(targetId) {
+            topLevelSections.forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(targetId).classList.add('active');
+            topNavBtns.forEach(btn => btn.classList.remove('active'));
+            const activeBtn = Array.from(topNavBtns).find(btn => btn.dataset.target === targetId);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+                activeBtn.setAttribute('aria-current', 'page');
+            }
+            topNavBtns.forEach(btn => {
+                if (btn !== activeBtn) btn.removeAttribute('aria-current');
+            });
+            if (targetId === 'courses-section') {
+                if (window.innerWidth >= 768) {
+                    coursesSidebar.style.display = 'block';
+                }
+                // Default to Andrew course when Courses tab is activated
+                // Find the Andrew link and trigger its click handler
+                const andrewLink = document.querySelector('.course-nav-link[data-target-course="andrew"]');
+                if (andrewLink) {
+                    handleCourseNavLinkClick(andrewLink);
+                }
+            } else {
+                coursesSidebar.style.display = 'none';
+                courseContentDisplays.forEach(display => display.classList.remove('active')); // Hide all course content displays
+            }
+            updateBreadcrumbs();
+        }
+
+        function handleCourseNavLinkClick(link) {
+            updatedCourseNavLinks.forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
+
+            const targetCourseName = link.dataset.targetCourse;
+
+            courseContentDisplays.forEach(display => display.classList.remove('active')); // Hide all course content displays
+
+            if (targetCourseName === 'andrew') {
+                document.getElementById('course-andrew-content').classList.add('active');
+                // Activate the first sub-section of Andrew by default
+                if (andrewSubSections.length > 0) {
+                    andrewSubSections.forEach(section => section.classList.remove('active'));
+                    document.getElementById('welcome').classList.add('active');
+                    // Also activate the corresponding sub-nav link
+                    andrewSubNavLinks.forEach(subLink => subLink.classList.remove('active'));
+                    document.querySelector('.andrew-sub-nav-link[data-target="welcome"]').classList.add('active');
+                }
+            } else {
+                document.getElementById('course-general-placeholder').classList.add('active');
+                document.getElementById('placeholder-course-title').textContent = `${targetCourseName.charAt(0).toUpperCase() + targetCourseName.slice(1)}`;
+                document.getElementById('placeholder-course-content-text').textContent = `This is a placeholder for the ${targetCourseName} course.`;
+            }
+        }
+
+        // Handle sub-content navigation within Andrew's course
+        andrewSubNavLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                andrewSubNavLinks.forEach(s => s.classList.remove('active'));
+                link.classList.add('active');
+                andrewSubSections.forEach(s => s.classList.remove('active'));
+                document.getElementById(link.dataset.target).classList.add('active');
+            });
+        });
+
+
+        topNavBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                activateTopLevelSection(btn.dataset.target);
+            });
+        });
+
+        function toggleVisibility(id) {
+            const element = document.getElementById(id);
+            element.classList.toggle('hidden');
+            const button = element.previousElementSibling;
+            if (button && button.textContent.includes('▼')) {
+                button.textContent = button.textContent.replace('▼', '▲');
+            } else if (button && button.textContent.includes('▲')) {
+                button.textContent = button.textContent.replace('▲', '▼');
+            }
+        }
+        
+        function toggleMobileTopNav() {
+            mobileTopNav.classList.toggle('hidden');
+        }
+
+        function showMessageBox(message) {
+            const messageBox = document.getElementById('messageBox');
+            const messageBoxText = document.getElementById('messageBoxText');
+            messageBoxText.textContent = message;
+            messageBox.classList.remove('hidden');
+        }
+
+        function hideMessageBox() {
+            document.getElementById('messageBox').classList.add('hidden');
+        }
+
+        function copyDocumentContent() {
+            const docTextarea = document.getElementById('fullDocumentText');
+            docTextarea.select();
+            document.execCommand('copy');
+            showMessageBox('Document content copied to clipboard!');
+        }
+
+        async function generateTestCases() {
+            const featureInput = document.getElementById('testCaseFeatureInput').value;
+            const outputDiv = document.getElementById('testCaseResult');
+            const loadingIndicator = document.getElementById('testCaseLoading');
+            const errorIndicator = document.getElementById('testCaseError');
+
+            outputDiv.innerHTML = '';
+            errorIndicator.classList.add('hidden');
+            loadingIndicator.classList.remove('hidden');
+
+            if (!featureInput.trim()) {
+                loadingIndicator.classList.add('hidden');
+                outputDiv.innerHTML = '<p class="text-red-600">Please enter a feature to generate test cases.</p>';
+                return;
+            }
+
+            try {
+                const prompt = `As a QA engineer, generate 3-5 basic test case ideas for testing a "${featureInput}". Focus on common scenarios for a beginner. Format as a bulleted list.`;
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+                const apiKey = ""; 
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    outputDiv.innerHTML = formatMarkdownToHtml(text);
+                } else {
+                    errorIndicator.classList.remove('hidden');
+                    console.error('Unexpected API response structure:', result);
+                }
+            } catch (error) {
+                errorIndicator.classList.remove('hidden');
+                console.error('Error calling Gemini API for test cases:', error);
+            } finally {
+                loadingIndicator.classList.add('hidden');
+            }
+        }
+
+        async function generateQuizQuestion() {
+            const topicInput = document.getElementById('quizTopicInput').value;
+            const outputDiv = document.getElementById('quizResult');
+            const loadingIndicator = document.getElementById('quizLoading');
+            const errorIndicator = document.getElementById('quizError');
+
+            outputDiv.innerHTML = '';
+            errorIndicator.classList.add('hidden');
+            loadingIndicator.classList.remove('hidden');
+
+            if (!topicInput.trim()) {
+                loadingIndicator.classList.add('hidden');
+                outputDiv.innerHTML = '<p class="text-red-600">Please enter a topic to generate a quiz question.</p>';
+                return;
+            }
+
+            try {
+                const prompt = `Generate one multiple-choice quiz question about "${topicInput}" for a beginner in software testing. Include 4 options (A, B, C, D) and clearly indicate the correct answer. Format as: Question: ... A) ... B) ... C) ... D) ... Correct Answer: ...`;
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+                const apiKey = ""; 
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    outputDiv.innerHTML = formatMarkdownToHtml(text);
+                } else {
+                    errorIndicator.classList.remove('hidden');
+                    console.error('Unexpected API response structure:', result);
+                }
+            } catch (error) {
+                errorIndicator.classList.remove('hidden');
+                console.error('Error calling Gemini API for quiz question:', error);
+            } finally {
+                loadingIndicator.classList.add('hidden');
+            }
+        }
+
+        function formatMarkdownToHtml(markdownText) {
+            let html = markdownText;
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/^- (.*)$/gm, '<li>$1</li>');
+            html = html.replace(/^(<li>.*<\/li>)$/ms, '<ul>$1</ul>');
+            html = html.replace(/\n/g, '<br>');
+            return html;
+        }
+
+        // Initial setup
+        if (topNavBtns.length > 0) {
+            topNavBtns[0].classList.add('active');
+            topNavBtns[0].setAttribute('aria-current', 'page');
+            activateTopLevelSection('courses-section');
+        }
+
+        const ctx = document.getElementById('programChart')?.getContext('2d');
+        if (ctx) {
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Objectives', 'Teaching Approach', 'Assessment Plan', 'Guiding Principles'],
+                    datasets: [{
+                        label: 'Key Elements per Section',
+                        data: [6, 7, 9, 7],
+                        backgroundColor: [
+                            'rgba(13, 148, 136, 0.7)',
+                            'rgba(15, 118, 110, 0.7)',
+                            'rgba(17, 94, 89, 0.7)',
+                            'rgba(19, 78, 74, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(13, 148, 136, 1)',
+                            'rgba(15, 118, 110, 1)',
+                            'rgba(17, 94, 89, 1)',
+                            'rgba(19, 78, 74, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#374151'
+                            },
+                            grid: {
+                                color: '#E5E7EB'
+                            }
+                        },
+                        x: {
+                           ticks: {
+                                color: '#374151'
+                            },
+                             grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#1F2937'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y + ' key elements';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initial setup for mobile view
+        if (window.innerWidth <= 768) {
+            coursesSidebar.classList.remove('open');
+            coursesSidebar.style.display = 'none';
+            mobileTopNav.style.display = 'none';
+        } else {
+            // On desktop, ensure sidebar is shown if Courses is the default active tab
+            if (document.querySelector('.top-nav-btn[data-target="courses-section"]').classList.contains('active')) {
+                coursesSidebar.style.display = 'block';
+            }
+        }
+
+        // --- Breadcrumbs ---
+        function updateBreadcrumbs() {
+            const breadcrumbs = document.getElementById('breadcrumbs');
+            let trail = [];
+            if (document.getElementById('courses-section').classList.contains('active')) {
+                trail.push('Courses');
+                const activeCourse = document.querySelector('.course-nav-link.active');
+                if (activeCourse) {
+                    trail.push(activeCourse.textContent.trim());
+                    if (activeCourse.dataset.targetCourse === 'andrew') {
+                        const activeSub = document.querySelector('.andrew-sub-nav-link.active');
+                        if (activeSub) trail.push(activeSub.textContent.trim());
+                    }
+                }
+            } else if (document.getElementById('upcoming-section').classList.contains('active')) {
+                trail.push('Upcoming');
+            }
+            breadcrumbs.innerHTML = trail.map((t, i) => `<span>${t}</span>${i < trail.length-1 ? ' / ' : ''}`).join('');
+        }
+
+        // --- Keyboard shortcuts: 1 = Courses, 2 = Upcoming ---
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if (e.key === '1') activateTopLevelSection('courses-section');
+            if (e.key === '2') activateTopLevelSection('upcoming-section');
+        });
+
+    </script>
+</body>
+</html>
