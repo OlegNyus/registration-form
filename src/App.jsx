@@ -16,6 +16,7 @@ import FunAscii from './components/FunAscii';
 import AI from './components/AI';
 import TestingResources from './components/TestingResources';
 import SQALearningGuide from './components/SQALearningGuide';
+import QaHubTool from './pages/QaHubTool';
 
 function App() {
   const [currentPage, setCurrentPage] = useState(() => {
@@ -171,6 +172,8 @@ function App() {
         return <AI onBack={handleBack} data-cy="ai-page"/>;
       case 'sqa-learning':
         return <SQALearningGuide onBack={handleBack} data-cy="sqa-learning-page" />;
+      case 'qahubtool':
+        return <QaHubTool />;
       default:
         return <LandingPage data-cy="landing-page-default" />;
     }
@@ -222,6 +225,7 @@ function App() {
             <a href="#ai" className="text-white hover:text-gray-300" data-cy="nav-link-ai">AI</a>
             <a href="#testing-resources" className="text-white hover:text-gray-300" data-cy="nav-link-testing-resources">Testing Resources</a>
             <a href="#sqa-learning" className="text-white hover:text-gray-300" data-cy="nav-link-sqa-learning">SQA Learning</a>
+            <a href="#qahubtool" className="text-white hover:text-gray-300" data-cy="nav-link-qahubtool">QaHubTool</a>
           </div>
         </div>
       </nav>
