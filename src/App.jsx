@@ -171,6 +171,7 @@ function App() {
       case 'ai':
         return <AI onBack={handleBack} data-cy="ai-page"/>;
       case 'sqa-learning':
+        // Hidden from navigation but accessible via direct URL: #sqa-learning
         return <SQALearningGuide onBack={handleBack} data-cy="sqa-learning-page" />;
       case 'qahubtool':
         return <QaHubTool />;
@@ -224,7 +225,6 @@ function App() {
             <a href="#fun-ascii" className="text-white hover:text-gray-300" data-cy="nav-link-fun-ascii">Fun ASCII</a>
             <a href="#ai" className="text-white hover:text-gray-300" data-cy="nav-link-ai">AI</a>
             <a href="#testing-resources" className="text-white hover:text-gray-300" data-cy="nav-link-testing-resources">Testing Resources</a>
-            <a href="#sqa-learning" className="text-white hover:text-gray-300" data-cy="nav-link-sqa-learning">SQA Learning</a>
             <a href="#qahubtool" className="text-white hover:text-gray-300" data-cy="nav-link-qahubtool">QaHubTool</a>
           </div>
         </div>

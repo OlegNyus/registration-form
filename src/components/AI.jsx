@@ -8,55 +8,59 @@ const AI = ({ onBack }) => {
   const [error, setError] = useState(null);
   const [conversationHistory, setConversationHistory] = useState([]);
 
+  // const apiUrl = 'http://localhost:3001/api/claude';
+  // AI functionality disabled for static deployment
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!prompt.trim()) return;
     
+    // Coming Soon - AI functionality 
     setIsLoading(true);
-    setError(null);
+    setError('');
     
-    // Add user message to conversation history
-    const userMessage = { role: 'user', content: prompt };
-    setConversationHistory(prev => [...prev, userMessage]);
+    setTimeout(() => {
+      setIsLoading(false);
+      setError('🚀 AI Chat feature is coming soon! We\'re working hard to bring you an amazing AI-powered experience.');
+    }, 1000);
     
+    // Original AI functionality commented out for static deployment
+    /*
+    if (!prompt.trim()) {
+      setError('Please enter a prompt');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+    setResponse('');
+
     try {
-      // Call the real Claude API through our proxy server
-      const apiUrl = 'http://localhost:3001/api/claude';
-      
-      const response = await fetch(apiUrl, {
+      const res = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ prompt })
+        body: JSON.stringify({ prompt }),
       });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `API request failed with status ${response.status}`);
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
       }
+
+      const data = await res.json();
       
-      const data = await response.json();
-      console.log('Claude API response:', data);
-      
-      let claudeResponse = '';
-      if (data.content && Array.isArray(data.content) && data.content.length > 0) {
-        claudeResponse = data.content[0].text;
+      if (data.content && data.content[0] && data.content[0].text) {
+        setResponse(data.content[0].text);
       } else {
-        claudeResponse = "Sorry, I couldn't generate a proper response.";
+        setError('Unexpected response format from Claude API');
       }
-      
-      // Add assistant response to conversation history
-      const assistantMessage = { role: 'assistant', content: claudeResponse };
-      setConversationHistory(prev => [...prev, assistantMessage]);
-      
-    } catch (err) {
-      console.error('Error calling Claude API:', err);
-      setError('Sorry, I encountered an error while processing your request. Please try again later.');
+    } catch (error) {
+      console.error('Error:', error);
+      setError(`Failed to get response: ${error.message}`);
     } finally {
       setIsLoading(false);
-      setPrompt(''); // Clear input after sending
     }
+    */
   };
 
   // Add keydown handler for Enter key submission
