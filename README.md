@@ -14,7 +14,7 @@ Follow these steps to run the application locally:
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd registration-form
+   cd QaHubAi-Web
    ```
 
 2. **Install dependencies**
